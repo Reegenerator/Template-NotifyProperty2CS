@@ -6,6 +6,9 @@ using System.Reflection;
 using EnvDTE80;
 
 namespace RgenLib {
+    /// <summary>
+    /// 
+    /// </summary>
     public class TypeCacheList {
         private readonly Dictionary<string, TypeCache> ByNameCache = new Dictionary<string, TypeCache>();
         private readonly Dictionary<Type, TypeCache> ByTypeCache = new Dictionary<Type, TypeCache>();

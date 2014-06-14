@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attributes", "Attributes\Attributes.csproj", "{1CF4996B-DA27-476A-9951-105241589F9C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RgenLib", "RgenLib\RgenLib.csproj", "{FA884BB3-23D7-495C-A246-364FB3B2A478}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,12 @@ Global
 		{1CF4996B-DA27-476A-9951-105241589F9C}.Reegenerator|Any CPU.Build.0 = Release|Any CPU
 		{1CF4996B-DA27-476A-9951-105241589F9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CF4996B-DA27-476A-9951-105241589F9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Reegenerator|Any CPU.ActiveCfg = Reegenerator|Any CPU
+		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Reegenerator|Any CPU.Build.0 = Reegenerator|Any CPU
+		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
