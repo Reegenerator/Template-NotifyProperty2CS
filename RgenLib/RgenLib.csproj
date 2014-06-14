@@ -165,12 +165,6 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RgenLib.Attributes\RgenLib.Attributes.csproj">
-      <Project>{07c4ae0f-b6a5-45fc-982c-e4ec2c0b6661}</Project>
-      <Name>RgenLib.Attributes</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

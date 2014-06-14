@@ -13,7 +13,6 @@ using System.Xml;
 using System.Xml.Linq;
 using EnvDTE;
 using EnvDTE80;
-using RgenLib.Attributes;
 using ProjectItem = Kodeo.Reegenerator.Wrappers.ProjectItem;
 using Solution = Kodeo.Reegenerator.Wrappers.Solution;
 
@@ -31,7 +30,7 @@ namespace RgenLib.Extensions
 		private static readonly Regex RemoveEmptyLines_regex = new Regex("^\\s+$[\\r\\n]*", RegexOptions.Multiline);
 		private static readonly Dictionary<string, Assembly> GetTypeFromProject_cache = new Dictionary<string, Assembly>();
 		//private static readonly ConcurrentDictionary<CodeClass, Type> ToPropertyInfo_classCache = new ConcurrentDictionary<CodeClass, Type>();
-		private static readonly Type GetGeneratorAttribute_type = typeof(GeneratorOptionAttribute);
+        //private static readonly Type GetGeneratorAttribute_type = typeof(GeneratorOptionAttribute);
 
 		public static IEnumerable<CodeClass2> GetClassesEx(this ProjectItem item)
 		{
@@ -562,12 +561,12 @@ namespace RgenLib.Extensions
 	        return mi.GetCustomAttributes<T>().Any();
 	    }
 
-		public static GeneratorOptionAttribute GetGeneratorAttribute(this MemberInfo mi)
-		{
+        //public static GeneratorOptionAttribute GetGeneratorAttribute(this MemberInfo mi)
+        //{
 
-            var genAttr = mi.GetCustomAttributes().FirstOrDefault(x => x.GetType().IsSubclassOf(GetGeneratorAttribute_type));
-            return (GeneratorOptionAttribute)genAttr;
-		}
+        //    var genAttr = mi.GetCustomAttributes().FirstOrDefault(x => x.GetType().IsSubclassOf(GetGeneratorAttribute_type));
+        //    return (GeneratorOptionAttribute)genAttr;
+        //}
 
 		public static Assembly GetAssemblyOfProjectItem(this EnvDTE.ProjectItem pi)
 		{
