@@ -24,7 +24,7 @@ namespace Templates {
         /// </summary>
         /// <returns>Array of invalid properties</returns>
         /// <remarks></remarks>
-        public string[] ValidateExtraNotifications(NotifyPropertyOptionAttribute optionAttr ,CodeClass2 cc, string[] extras) {
+        public string[] ValidateExtraNotifications(Attributes.NotifyPropertyOptionAttribute optionAttr ,CodeClass2 cc, string[] extras) {
 
             var propNames = new HashSet<string>(cc.GetProperties().Select((x) => x.Name));
             var invalids = extras.Where((x) => !(propNames.Contains(x))).ToArray();
@@ -32,13 +32,10 @@ namespace Templates {
                 return invalids;
             }
 
-            ExtraNotifications = string.Join(", ", extras);
+            optionAttr.ExtraNotifications = string.Join(", ", extras);
             return new string[0]; //return empty array
         }
 
-        public override bool AreArgumentsEquals(GeneratorAttribute other) {
-            var otherNPC = (NotifyPropertyChanged_GenAttribute)other;
-            return base.AreArgumentsEquals(other) && this.ExtraNotifications == otherNPC.ExtraNotifications;
-        }
+    
     }
 }
