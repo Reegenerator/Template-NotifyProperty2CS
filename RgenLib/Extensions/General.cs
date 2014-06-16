@@ -16,276 +16,299 @@ using EnvDTE80;
 using ProjectItem = Kodeo.Reegenerator.Wrappers.ProjectItem;
 using Solution = Kodeo.Reegenerator.Wrappers.Solution;
 
-namespace RgenLib.Extensions
-{
-	public static class General
-	{
+namespace RgenLib.Extensions {
+    public static class General {
 
-#region Code element helpers
+        #region Code element helpers
 
         private const string InterfaceImplementationPattern = @"^.*?\sAs\s.*?(?<impl>Implements\s.*?)$";
 
-	    private static readonly Type IsEqual_attrType = typeof(Attribute);
-		private static readonly Regex GetInterfaceImplementation_regex = new Regex(InterfaceImplementationPattern, RgenLib.TaggedSegment.Constants.DefaultRegexOption);
-		private static readonly Regex RemoveEmptyLines_regex = new Regex("^\\s+$[\\r\\n]*", RegexOptions.Multiline);
-		private static readonly Dictionary<string, Assembly> GetTypeFromProject_cache = new Dictionary<string, Assembly>();
-		//private static readonly ConcurrentDictionary<CodeClass, Type> ToPropertyInfo_classCache = new ConcurrentDictionary<CodeClass, Type>();
+        private static readonly Type IsEqual_attrType = typeof(Attribute);
+        private static readonly Regex GetInterfaceImplementation_regex = new Regex(InterfaceImplementationPattern, RgenLib.TaggedSegment.Constants.DefaultRegexOption);
+        private static readonly Regex RemoveEmptyLines_regex = new Regex("^\\s+$[\\r\\n]*", RegexOptions.Multiline);
+        private static readonly Dictionary<string, Assembly> GetTypeFromProject_cache = new Dictionary<string, Assembly>();
+        //private static readonly ConcurrentDictionary<CodeClass, Type> ToPropertyInfo_classCache = new ConcurrentDictionary<CodeClass, Type>();
         //private static readonly Type GetGeneratorAttribute_type = typeof(GeneratorOptionAttribute);
 
-		public static IEnumerable<CodeClass2> GetClassesEx(this ProjectItem item)
-		{
-			var classes = item.GetClasses().Values.SelectMany(x => x).Cast<CodeClass2>();
-			return classes;
-		}
+        public static IEnumerable<CodeClass2> GetClassesEx(this ProjectItem item) {
+            var classes = item.GetClasses().Values.SelectMany(x => x).Cast<CodeClass2>();
+            return classes;
+        }
 
 
-		public static IEnumerable<CodeClass2> GetClassesWithAttributes(this ProjectItem item, Type[] attributes)
-		{
-			//Replace nested class + delimiter into . as the format used in CodeAttribute.FullName
-			var fullNames = attributes.Select(x=> x.DottedFullName()).ToArray();
-			var res = item.GetClassesEx().Where(cclass => fullNames.All(attrName => cclass.Attributes.Cast<CodeAttribute>().Any(cAttr => cAttr.FullName == attrName)));
+        public static IEnumerable<CodeClass2> GetClassesWithAttributes(this ProjectItem item, Type[] attributes) {
+            //Replace nested class + delimiter into . as the format used in CodeAttribute.FullName
+            var fullNames = attributes.Select(x => x.DottedFullName()).ToArray();
+            var res = item.GetClassesEx().Where(cclass => fullNames.All(attrName => cclass.Attributes.Cast<CodeAttribute>().Any(cAttr => cAttr.FullName == attrName)));
 
-			return res;
-		}
+            return res;
+        }
 
 
 
-		/// <summary>
-		/// Returns full name delimited by only dots (and no +(plus sign))
-		/// </summary>
-		/// <param name="x"></param>
-		/// <returns></returns>
-		/// <remarks>Nested class is separated with +, while CodeClass delimit them using dots</remarks>
-		public static string DottedFullName(this Type x)
-		{
+        /// <summary>
+        /// Returns full name delimited by only dots (and no +(plus sign))
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        /// <remarks>Nested class is separated with +, while CodeClass delimit them using dots</remarks>
+        public static string DottedFullName(this Type x) {
 
-			return x.FullName.Replace("+", ".");
-		}
+            return x.FullName.Replace("+", ".");
+        }
 
-		public static IEnumerable<CodeClass2> GetClassesWithAttribute(this ProjectItem item, Type attribute)
-		{
+        public static IEnumerable<CodeClass2> GetClassesWithAttribute(this ProjectItem item, Type attribute) {
             var fullName = attribute.DottedFullName();
-			//   all attributes is in class attribute
+            //   all attributes is in class attribute
             var res = item.GetClassesEx().Where(cclass => cclass.Attributes.Cast<CodeAttribute>().Any(x => x.FullName == fullName));
 
-			return res;
-		}
+            return res;
+        }
 
-		public static IEnumerable<CodeClass2> GetClassesWithAttribute(this DTE dte, Type attribute)
-		{
-			var projects = Solution.GetSolutionProjects(dte.Solution).Values;
-			var res = from p in projects
-			          from eleList in p.GetCodeElements<CodeClass2>().Values
-			          from ele in eleList
-                      where ele.Attributes.Cast<CodeAttribute>().Any(x => x.AsCodeElement().IsEqual(attribute))
-			          select ele;
+        public static IEnumerable<CodeClass2> GetClassesWithAttribute(this DTE dte, Type attribute) {
+            var projects = Solution.GetSolutionProjects(dte.Solution).Values;
+            var res = from p in projects
+                      from eleList in p.GetCodeElements<CodeClass2>().Values
+                      from ele in eleList
+                      where ele.Attributes.Cast<CodeAttribute>().Any(x => x.AsCodeElement().IsEqualToType(attribute))
+                      select ele;
 
-			return res;
-		}
+            return res;
+        }
 
-		/// <summary>
-		/// Use this to convert Code element into a more generic CodeElement and get CodeElement based extensions
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="cc"></param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static CodeElement2 AsCodeElement<T>(this T cc)
-		{
-			return (CodeElement2)cc;
-		}
-		public static CodeType AsCode<T>(this T cc)
-		{
+        /// <summary>
+        /// Use this to convert Code element into a more generic CodeElement and get CodeElement based extensions
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cc"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public static CodeElement2 AsCodeElement<T>(this T cc) {
+            return (CodeElement2)cc;
+        }
+        public static CodeType AsCode<T>(this T cc) {
 
-			return (CodeType)cc;
-		}
-
-		public static bool HasAttribute(this CodeType ct, Type attrType)
-		{
-			return ct.GetCustomAttribute(attrType) != null;
-		}
+            return (CodeType)cc;
+        }
 
 
-#region CodeElement2 Attribute Functions
+        #region CodeElement2 Attribute Functions
 
-		public static CodeAttribute2 GetCustomAttribute(this CodeElement2 cc, Type attrType)
-		{
+        /// <summary>
+        /// Convert CodeAttribute into an actual Attribute instance
+        /// </summary>
+        /// <typeparam name="TAttr"></typeparam>
+        /// <param name="codeAttr"></param>
+        /// <returns></returns>
+        public static TAttr ToAttribute<TAttr>(this CodeAttribute2 codeAttr) where TAttr : Attribute,new()
+        {
+            var typeCache = TypeResolver.ByType<TAttr>();
+            var attr = new TAttr();
+            foreach (var arg in codeAttr.GetArguments())
+            {
 
-            var res = cc.GetCustomAttributes().FirstOrDefault(x => x.AsCodeElement().IsEqual(attrType));
-			return res;
-		}
+                ((PropertyInfo) typeCache[arg.Name]).SetValue(attr, ParseAttributeProperty<TAttr>(arg.Value));
+            }
+            return attr;
+        }
 
-		/// <summary>
-		/// Get Custom Attributes
-		/// </summary>
-		/// <param name="ce"></param>
-		/// <returns></returns>
-		/// <remarks>
-		/// Requires Named Argument when declaring the Custom Attribute, otherwise Name will be empty.
-		/// Not using reflection because it requires successful build
-		/// </remarks>
-		public static IEnumerable<CodeAttribute2> GetCustomAttributes(this CodeElement2 ce)
-		{
-			//!Property
-			var prop = ce as CodeProperty2;
-			if (prop != null)
-			{
-				return prop.Attributes.Cast<CodeAttribute2>();
-			}
+        public static bool HasAttribute(this CodeType ct, Type attrType) {
+            return ct.GetCustomAttribute(attrType) != null;
+        }
 
-			//!Function
-			var func = ce as CodeFunction2;
-			if (func != null)
-			{
-				return func.Attributes.Cast<CodeAttribute2>();
-			}
-
-			//!Class
-			var cc = ce as CodeClass2;
-			if (cc != null)
-			{
-				return cc.Attributes.Cast<CodeAttribute2>();
-			}
-
-			throw new Exception("CodeElement not recognized");
-			//return Enumerable.Empty<CodeAttribute2>();
-		}
-
-		public static bool HasAttribute(this CodeElement2 ct, Type attrType)
-		{
-			return ct.GetCustomAttribute(attrType) != null;
-		}
-
-#endregion
-#region GetCustomAttributes of CodeType/CodeClass 
+        public static TResult GetProperty<T, TResult>(this CodeAttribute2 attr, Expression<Func<T, TResult>> propExpr) {
+            var propName = ExprToString(propExpr);
+            var codeAttributeArgument = attr.GetArguments().SingleOrDefault(a => a.Name == propName);
+            string propValue = null;
+            if (codeAttributeArgument != null) {
+                propValue = codeAttributeArgument.Value;
+            }
+            return ParseAttributeProperty<TResult>(propValue);
+        }
 
 
-		public static IEnumerable<CustomAttributeData> GetCustomAttributes(this CodeType ct)
-		{
-		    var type = Type.GetType(ct.FullName);
-		    if (type == null) throw new Exception(string.Format("Type{0} not found",ct.FullName));
-		    return type.CustomAttributes;
-		}
+        /// <summary>
+        /// Parse Attribute Argument into the actual string value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <remarks>
+        /// Attribute argument is presented exactly as it was typed
+        /// Ex: SomeArg:="Test" would result in the Argument.Value "Test" (with quote)
+        /// Ex: SomeArg:=("Test") would result in the Argument.Value ("Test") (with parentheses and quote)
+        /// </remarks>
+        private static T ParseAttributeProperty<T>(string value) {
+            object parsed = null;
+            var propType = typeof(T);
+            if (propType.IsEnum) {
+                parsed = value.StripQualifier();
+            }
+            else if (propType == typeof(string)) {
+                parsed = value.Trim('\"');
+            }
+            else {
+                parsed = value;
+            }
+            return (T)parsed;
+        }
 
-	    public static IEnumerable<CustomAttributeData> GetCustomAttributes(this CodeClass cc)
-		{
+        static public TResult GetAttributeProperty<TAttr, TResult>(this  CodeElement2 ce, Expression<Func<TAttr, TResult>> memberExpr)
+              where TAttr : Attribute {
+            return ce.GetCustomAttribute(typeof(TAttr)).GetProperty(memberExpr);
+        }
+
+        public static CodeAttribute2 GetCustomAttribute(this CodeElement2 cc, Type attrType) {
+
+            var res = cc.GetCustomAttributes().FirstOrDefault(x => x.AsCodeElement().IsEqualToType(attrType));
+
+            return res;
+        }
+
+        /// <summary>
+        /// Get Custom Attributes
+        /// </summary>
+        /// <param name="ce"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Requires Named Argument when declaring the Custom Attribute, otherwise Name will be empty.
+        /// Not using reflection because it requires successful build
+        /// </remarks>
+        public static IEnumerable<CodeAttribute2> GetCustomAttributes(this CodeElement2 ce) {
+            //!Property
+            var prop = ce as CodeProperty2;
+            if (prop != null) {
+                return prop.Attributes.Cast<CodeAttribute2>();
+            }
+
+            //!Function
+            var func = ce as CodeFunction2;
+            if (func != null) {
+                return func.Attributes.Cast<CodeAttribute2>();
+            }
+
+            //!Class
+            var cc = ce as CodeClass2;
+            if (cc != null) {
+                return cc.Attributes.Cast<CodeAttribute2>();
+            }
+
+            throw new Exception("CodeElement not recognized");
+            //return Enumerable.Empty<CodeAttribute2>();
+        }
+
+        public static bool HasAttribute(this CodeElement2 ct, Type attrType) {
+            return ct.GetCustomAttribute(attrType) != null;
+        }
+
+        #endregion
+        #region GetCustomAttributes of CodeType/CodeClass
+
+
+        public static IEnumerable<CustomAttributeData> GetCustomAttributes(this CodeType ct) {
+            var type = Type.GetType(ct.FullName);
+            if (type == null) throw new Exception(string.Format("Type{0} not found", ct.FullName));
+            return type.CustomAttributes;
+        }
+
+        public static IEnumerable<CustomAttributeData> GetCustomAttributes(this CodeClass cc) {
             var type = Type.GetType(cc.FullName);
             if (type == null) throw new Exception(string.Format("Type{0} not found", cc.FullName));
             return type.CustomAttributes;
-		}
-		public static CustomAttributeData GetCustomAttribute(this CodeType ct, Type attrType)
-		{
-			return ct.GetCustomAttributes().FirstOrDefault(x => x.AttributeType == attrType);
-		}
-		public static CustomAttributeData GetCustomAttribute(this CodeClass cc, Type attrType)
-		{
-			return cc.GetCustomAttributes().FirstOrDefault(x => x.AttributeType == attrType);
-		}
+        }
+        public static CustomAttributeData GetCustomAttribute(this CodeType ct, Type attrType) {
+            return ct.GetCustomAttributes().FirstOrDefault(x => x.AttributeType == attrType);
+        }
+        public static CustomAttributeData GetCustomAttribute(this CodeClass cc, Type attrType) {
+            return cc.GetCustomAttributes().FirstOrDefault(x => x.AttributeType == attrType);
+        }
 
 
 
-		public static IEnumerable<CodeAttributeArgument> GetCodeAttributeArguments(this CodeAttribute2 cattr)
-		{
-			if (cattr == null)
-			{
-				return Enumerable.Empty<CodeAttributeArgument>();
-			}
-			return cattr.Arguments.Cast<CodeAttributeArgument>();
-		}
-		public static bool IsEqual(this CodeElement2 ele, Type type)
-		{
+        public static IEnumerable<CodeAttributeArgument> GetArguments(this CodeAttribute2 cattr) {
+            if (cattr == null) {
+                return Enumerable.Empty<CodeAttributeArgument>();
+            }
+            return cattr.Arguments.Cast<CodeAttributeArgument>();
+        }
+        public static bool IsEqualToType(this CodeElement2 ele, Type type) {
 
-			return ele.FullName == type.FullName || ele.Name == type.Name || (type.IsSubclassOf(IsEqual_attrType) && (ele.FullName + "Attribute" == type.FullName || ele.Name + "Attribute" == type.Name));
-		}
+            return ele.FullName == type.FullName || ele.Name == type.Name || (type.IsSubclassOf(IsEqual_attrType) && (ele.FullName + "Attribute" == type.FullName || ele.Name + "Attribute" == type.Name));
+        }
 
-#endregion
-#region CodeClass members(property, function, variable) helper
+        #endregion
+        #region CodeClass members(property, function, variable) helper
 
-		public static IEnumerable<CodeProperty2> GetProperties(this CodeClass cls)
-		{
-			return cls.Children.OfType<CodeProperty2>();
-		}
-		public static IEnumerable<CodeFunction2> GetFunctions(this CodeClass cls)
-		{
-			return cls.Children.OfType<CodeFunction2>();
-		}
+        public static IEnumerable<CodeProperty2> GetProperties(this CodeClass cls) {
+            return cls.Children.OfType<CodeProperty2>();
+        }
+        public static IEnumerable<CodeFunction2> GetFunctions(this CodeClass cls) {
+            return cls.Children.OfType<CodeFunction2>();
+        }
 
-		public static CodeProperty2[] GetAutoProperties(this CodeClass2 cls)
-		{
+        public static CodeProperty2[] GetAutoProperties(this CodeClass2 cls) {
 
             var props = cls.GetProperties().ToArray();
-		    Func<CodeProperty, bool> isAutoProperty = x => !x.Setter.GetText().Contains("{");
-		 
-			return props.Where(x => x.ReadWrite == vsCMPropertyKind.vsCMPropertyKindReadWrite &&
+            Func<CodeProperty, bool> isAutoProperty = x => !x.Setter.GetText().Contains("{");
+
+            return props.Where(x => x.ReadWrite == vsCMPropertyKind.vsCMPropertyKindReadWrite &&
                isAutoProperty(x) && x.OverrideKind != vsCMOverrideKind.vsCMOverrideKindAbstract).ToArray();
-		}
+        }
 
-		public static IEnumerable<CodeVariable> GetVariables(this CodeClass cls)
-		{
-			return cls.Children.OfType<CodeVariable>();
-		}
-		public static IEnumerable<CodeVariable> GetDependencyProperties(this CodeClass cls)
-		{
-			try
-			{
+        public static IEnumerable<CodeVariable> GetVariables(this CodeClass cls) {
+            return cls.Children.OfType<CodeVariable>();
+        }
+        public static IEnumerable<CodeVariable> GetDependencyProperties(this CodeClass cls) {
+            try {
 
-				var sharedFields = cls.GetVariables().Where(x => x.IsShared && x.Type.CodeType != null);
-				return sharedFields.Where(x => x.Type.CodeType.FullName == "System.Windows.DependencyProperty");
-			}
-			catch (Exception ex)
-			{
+                var sharedFields = cls.GetVariables().Where(x => x.IsShared && x.Type.CodeType != null);
+                return sharedFields.Where(x => x.Type.CodeType.FullName == "System.Windows.DependencyProperty");
+            }
+            catch (Exception ex) {
 
-			    Debug.DebugHere(ex);
-			}
-			return null;
-		}
+                Debug.DebugHere(ex);
+            }
+            return null;
+        }
 
 
 
-		/// <summary>
-		/// Get Bases recursively
-		/// </summary>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static IEnumerable<CodeClass2> GetAncestorClasses(this CodeClass2 cc)
-		{
-		
+        /// <summary>
+        /// Get Bases recursively
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public static IEnumerable<CodeClass2> GetAncestorClasses(this CodeClass2 cc) {
+
             var bases = cc.Bases.OfType<CodeClass2>().ToArray();
 
-			if (bases.FirstOrDefault() == null)
-			{
-				return bases;
-			}
-			var grandBases = bases.SelectMany(x => x.GetAncestorClasses());
+            if (bases.FirstOrDefault() == null) {
+                return bases;
+            }
+            var grandBases = bases.SelectMany(x => x.GetAncestorClasses());
 
-			return bases.Concat(grandBases);
+            return bases.Concat(grandBases);
 
-		}
-#endregion
-#endregion
+        }
+        #endregion
+        #endregion
 
-		public static string GetText(this CodeProperty2 prop, vsCMPart part = vsCMPart.vsCMPartWholeWithAttributes)
-		{
-		   
-		    try
-		    {
+        public static string GetText(this CodeProperty2 prop, vsCMPart part = vsCMPart.vsCMPartWholeWithAttributes) {
+
+            try {
                 var p = prop.GetStartPoint(part);
                 if (p == null) {
                     return "";
                 }
                 return p.CreateEditPoint().GetText(prop.GetEndPoint(part));
-		    }
-		    catch (Exception ex)
-		    {
-		        if (ex is COMException || ex is NotImplementedException)
-		        {
+            }
+            catch (Exception ex) {
+                if (ex is COMException || ex is NotImplementedException) {
                     return "";
-		        }
+                }
                 throw;
-		    }
+            }
 
 
-		}
+        }
         public static string GetText(this CodeFunction ele, vsCMPart part = vsCMPart.vsCMPartWholeWithAttributes) {
             var p = ele.GetStartPoint(part);
             if (p == null) {
@@ -294,56 +317,50 @@ namespace RgenLib.Extensions
             return p.CreateEditPoint().GetText(ele.GetEndPoint(part));
 
         }
-		public static string GetText(this CodeClass2 cls, vsCMPart part = vsCMPart.vsCMPartWholeWithAttributes)
-		{
+        public static string GetText(this CodeClass2 cls, vsCMPart part = vsCMPart.vsCMPartWholeWithAttributes) {
             try {
-			var startPoint = cls.GetStartPoint(part);
-			if (startPoint == null) return "";
+                var startPoint = cls.GetStartPoint(part);
+                if (startPoint == null) return "";
 
                 var endPoint = cls.GetEndPoint(part);
-		  
-		    return endPoint == null ? "" : startPoint.CreateEditPoint().GetText(endPoint);
+
+                return endPoint == null ? "" : startPoint.CreateEditPoint().GetText(endPoint);
             }
             catch (NotImplementedException e) {
                 //catch random errors when trying to get start / end point
                 Console.WriteLine(e.ToString());
                 return "";
             }
-		}
+        }
 
-		public static string GetInterfaceImplementation(this CodeProperty2 prop)
-		{
+        public static string GetInterfaceImplementation(this CodeProperty2 prop) {
 
-			var g = GetInterfaceImplementation_regex.Match(prop.GetText(vsCMPart.vsCMPartHeader)).Groups["impl"];
+            var g = GetInterfaceImplementation_regex.Match(prop.GetText(vsCMPart.vsCMPartHeader)).Groups["impl"];
 
-			//add space to separate
-			if (g.Success)
-			{
-				return " " + g.Value;
-			}
-			return null;
-		}
-		public static EnvDTE.TextPoint GetAttributeStartPoint(this CodeProperty2 prop)
-		{
-			return prop.GetStartPoint();
-		}
+            //add space to separate
+            if (g.Success) {
+                return " " + g.Value;
+            }
+            return null;
+        }
+        public static EnvDTE.TextPoint GetAttributeStartPoint(this CodeProperty2 prop) {
+            return prop.GetStartPoint();
+        }
 
 
-		private static Regex _DocCommentRegex;
-		/// <summary>
-		/// Lazy Regex property to match doc comments
-		/// </summary>
-		/// <value></value>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static Regex DocCommentRegex
-		{
-			get
-			{
-			    const string docCommentPattern = @"\s*///";
-			    return _DocCommentRegex ?? (_DocCommentRegex = new Regex(docCommentPattern));
-			}
-		}
+        private static Regex _DocCommentRegex;
+        /// <summary>
+        /// Lazy Regex property to match doc comments
+        /// </summary>
+        /// <value></value>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public static Regex DocCommentRegex {
+            get {
+                const string docCommentPattern = @"\s*///";
+                return _DocCommentRegex ?? (_DocCommentRegex = new Regex(docCommentPattern));
+            }
+        }
 
         /// <summary>
         /// GetStartPoint can throw NotImplementedException. This will retry the start point without explicit attribute
@@ -351,10 +368,8 @@ namespace RgenLib.Extensions
         /// <param name="ce"></param>
         /// <param name="part"></param>
         /// <returns></returns>
-	    public static EnvDTE.TextPoint GetSafeStartPoint(this CodeElement ce, vsCMPart part = vsCMPart.vsCMPartWholeWithAttributes)
-	    {
-            try
-            {
+        public static EnvDTE.TextPoint GetSafeStartPoint(this CodeElement ce, vsCMPart part = vsCMPart.vsCMPartWholeWithAttributes) {
+            try {
                 return ce.GetStartPoint(part);
 
             }
@@ -362,21 +377,18 @@ namespace RgenLib.Extensions
                 //Catch random notimplementedException
                 return ce.GetStartPoint();
             }
-	    }
+        }
 
-	    public static string GetDocComment(this CodeElement ce)
-	    {
-	        var commentStart = ce.GetCommentStartPoint();
-	        if (commentStart == null)
-	        {
-	            return "";
-	        }
+        public static string GetDocComment(this CodeElement ce) {
+            var commentStart = ce.GetCommentStartPoint();
+            if (commentStart == null) {
+                return "";
+            }
 
-            var comment= commentStart.GetText(ce.GetStartPoint());
+            var comment = commentStart.GetText(ce.GetStartPoint());
             return comment;
-	    }
-		public static EditPoint GetCommentStartPoint(this CodeElement ce)
-		{
+        }
+        public static EditPoint GetCommentStartPoint(this CodeElement ce) {
             try {
                 return ce.GetSafeStartPoint().GetCommentStartPoint();
 
@@ -385,41 +397,38 @@ namespace RgenLib.Extensions
                 //Catch random notimplementedException
                 return null;
             }
-		}
-		public static EditPoint GetCommentStartPoint(this CodeProperty2 ce)
-		{
-		  
-		    return ce.AsCodeElement().GetCommentStartPoint();
-		}
+        }
+        public static EditPoint GetCommentStartPoint(this CodeProperty2 ce) {
 
-		/// <summary>
-		/// Get to the beginning of doc comments for startPoint
-		/// </summary>
-		/// <param name="startPoint"></param>
-		/// <returns></returns>
-		/// <remarks>
-		/// EnvDte does not have a way to get to the starting point of a code element doc comment. 
-		/// If we need to insert some text before a code element that has doc comments we need to go to the beggining of the comments.
-		/// </remarks>
-		public static EditPoint GetCommentStartPoint(this EnvDTE.TextPoint startPoint)
-		{
+            return ce.AsCodeElement().GetCommentStartPoint();
+        }
 
-			var sp = startPoint.CreateEditPoint();
-			//keep going 1 line up until the line does not start with doc comment prefix
-			do
-			{
-				sp.LineUp();
+        /// <summary>
+        /// Get to the beginning of doc comments for startPoint
+        /// </summary>
+        /// <param name="startPoint"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// EnvDte does not have a way to get to the starting point of a code element doc comment. 
+        /// If we need to insert some text before a code element that has doc comments we need to go to the beggining of the comments.
+        /// </remarks>
+        public static EditPoint GetCommentStartPoint(this EnvDTE.TextPoint startPoint) {
+
+            var sp = startPoint.CreateEditPoint();
+            //keep going 1 line up until the line does not start with doc comment prefix
+            do {
+                sp.LineUp();
             } while (DocCommentRegex.IsMatch(sp.GetLineText()));
-			//Go to the beginning of first line of comment, or element itself
-			sp.LineDown();
-			sp.StartOfLine();
-			return sp;
-		}
+            //Go to the beginning of first line of comment, or element itself
+            sp.LineDown();
+            sp.StartOfLine();
+            return sp;
+        }
 
         public static EditPoint GetPositionBeforeClosingBrace(this CodeFunction cf) {
             const string closingBrace = "}";
             var sp = cf.EndPoint.CreateEditPoint();
-            
+
             //keep going 1 char left until we found the } char
             do {
                 sp.CharLeft();
@@ -429,137 +438,121 @@ namespace RgenLib.Extensions
             return sp;
         }
 
-		public static string ToStringFormatted(this XElement xml)
-		{
-			var settings = new XmlWriterSettings {OmitXmlDeclaration = true};
+        public static string ToStringFormatted(this XElement xml) {
+            var settings = new XmlWriterSettings { OmitXmlDeclaration = true };
 
-		    var result = new StringBuilder();
-			using (var writer = XmlWriter.Create(result, settings))
-			{
+            var result = new StringBuilder();
+            using (var writer = XmlWriter.Create(result, settings)) {
 
-				xml.WriteTo(writer);
-			}
-			return result.ToString();
-		}
+                xml.WriteTo(writer);
+            }
+            return result.ToString();
+        }
 
-#region ExprToString. Convert Member Expression to string.
+        #region ExprToString. Convert Member Expression to string.
 
-		public static string[] ExprsToString<T>(params Expression<Func<T, object>>[] exprs)
-		{
+        public static string[] ExprsToString<T>(params Expression<Func<T, object>>[] exprs) {
 
-			var strings = (
-			    from x in exprs
-			    select ((LambdaExpression)x).ExprToString()).ToArray();
-			return strings;
-		}
+            var strings = (
+                from x in exprs
+                select ((LambdaExpression)x).ExprToString()).ToArray();
+            return strings;
+        }
 
-		public static string ExprToString<T, T2>(this Expression<Func<T, T2>> expr)
-		{
-			return ((LambdaExpression)expr).ExprToString();
-		}
+        public static string ExprToString<T, T2>(this Expression<Func<T, T2>> expr) {
+            return ((LambdaExpression)expr).ExprToString();
+        }
 
-		public static string ExprToString(this LambdaExpression memberExpr)
-		{
-			if (memberExpr == null)
-			{
-				return "";
-			}
-		    //when T2 is object, the expression will be wrapped in UnaryExpression of Convert{}
-			var convertedToObject = memberExpr.Body as UnaryExpression;
-			var currExpr = convertedToObject != null ? convertedToObject.Operand : memberExpr.Body;
-			switch (currExpr.NodeType)
-			{
-				case ExpressionType.MemberAccess:
-					var ex = (MemberExpression)currExpr;
-					return ex.Member.Name;
-			}
+        public static string ExprToString(this LambdaExpression memberExpr) {
+            if (memberExpr == null) {
+                return "";
+            }
+            //when T2 is object, the expression will be wrapped in UnaryExpression of Convert{}
+            var convertedToObject = memberExpr.Body as UnaryExpression;
+            var currExpr = convertedToObject != null ? convertedToObject.Operand : memberExpr.Body;
+            switch (currExpr.NodeType) {
+                case ExpressionType.MemberAccess:
+                    var ex = (MemberExpression)currExpr;
+                    return ex.Member.Name;
+            }
 
-			throw new Exception("Expression ToString() extension only processes MemberExpression");
-		}
+            throw new Exception("Expression ToString() extension only processes MemberExpression");
+        }
 
-#endregion
+        #endregion
 
-		public static List<Type> FindAllDerivedTypes<T>()
-		{
-			return FindAllDerivedTypes<T>(Assembly.GetAssembly(typeof(T)));
-		}
+        public static List<Type> FindAllDerivedTypes<T>() {
+            return FindAllDerivedTypes<T>(Assembly.GetAssembly(typeof(T)));
+        }
 
-		public static List<Type> FindAllDerivedTypes<T>(Assembly assembly)
-		{
-			var derivedType = typeof(T);
-			return assembly.GetTypes().Where(x => x != derivedType && derivedType.IsAssignableFrom(x)).ToList();
+        public static List<Type> FindAllDerivedTypes<T>(Assembly assembly) {
+            var derivedType = typeof(T);
+            return assembly.GetTypes().Where(x => x != derivedType && derivedType.IsAssignableFrom(x)).ToList();
 
-		}
+        }
 
-		public static IEnumerable<CodeClass2> GetSubclasses(this CodeClass2 cc)
-		{
-			var fullname = cc.FullName;
-			var list = new List<CodeClass2>();
-			Kodeo.Reegenerator.Wrappers.CodeElement.TraverseSolutionForCodeElements<CodeClass2>(
+        public static IEnumerable<CodeClass2> GetSubclasses(this CodeClass2 cc) {
+            var fullname = cc.FullName;
+            var list = new List<CodeClass2>();
+            Kodeo.Reegenerator.Wrappers.CodeElement.TraverseSolutionForCodeElements<CodeClass2>(
                 cc.DTE.Solution, list.Add, x => x.FullName != fullname && x.IsDerivedFrom[fullname]);
-			return list.ToArray();
-		}
+            return list.ToArray();
+        }
 
-		public static string RemoveEmptyLines(this string s)
-		{
+        public static string RemoveEmptyLines(this string s) {
 
-			return RemoveEmptyLines_regex.Replace(s, "");
-		}
+            return RemoveEmptyLines_regex.Replace(s, "");
+        }
 
 
-		public static TResult SelectOrDefault<T, TResult>(this T obj, Func<T, TResult> selectFunc, TResult defaultValue = null) where T :class where TResult : class
-		{
-		    return obj == null ? defaultValue : selectFunc(obj);
-		}
+        public static TResult SelectOrDefault<T, TResult>(this T obj, Func<T, TResult> selectFunc, TResult defaultValue = null)
+            where T : class
+            where TResult : class {
+            return obj == null ? defaultValue : selectFunc(obj);
+        }
 
-	    /// <summary>
-		/// Returns a type from an assembly reference by ProjectItem.Project. Cached.
-		/// </summary>
-		/// <param name="pi"></param>
-		/// <param name="typeName"></param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static Type GetTypeFromProject(this EnvDTE.ProjectItem pi, string typeName)
-		{
+        /// <summary>
+        /// Returns a type from an assembly reference by ProjectItem.Project. Cached.
+        /// </summary>
+        /// <param name="pi"></param>
+        /// <param name="typeName"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public static Type GetTypeFromProject(this EnvDTE.ProjectItem pi, string typeName) {
 
-			var path = pi.GetAssemblyPath();
-			if (!(GetTypeFromProject_cache.ContainsKey(path)))
-			{
-				GetTypeFromProject_cache.Add(path, Assembly.LoadFrom(path));
-			}
+            var path = pi.GetAssemblyPath();
+            if (!(GetTypeFromProject_cache.ContainsKey(path))) {
+                GetTypeFromProject_cache.Add(path, Assembly.LoadFrom(path));
+            }
 
-			var asm = GetTypeFromProject_cache[path];
-			var type= asm.GetType(typeName);
-	        if (type == null)
-	        {
-	            throw new Exception(
-	                string.Format("Type {0} not found in assembly {1} at {2}. You may need to rebuild the assembly.",
-	                    typeName, asm.FullName, path));
-	        }
+            var asm = GetTypeFromProject_cache[path];
+            var type = asm.GetType(typeName);
+            if (type == null) {
+                throw new Exception(
+                    string.Format("Type {0} not found in assembly {1} at {2}. You may need to rebuild the assembly.",
+                        typeName, asm.FullName, path));
+            }
             return type;
-		}
-		public static Type ToType(this CodeClass cc)
-		{
-			return cc.ProjectItem.GetTypeFromProject(cc.FullName);
-		}
+        }
+        public static Type ToType(this CodeClass cc) {
+            return cc.ProjectItem.GetTypeFromProject(cc.FullName);
+        }
 
-		/// <summary>
-		/// Convert CodeProperty2 to PropertyInfo. Cached
-		/// </summary>
-		/// <param name="prop"></param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static PropertyInfo ToPropertyInfo(this CodeProperty2 prop)
-		{
-		    var t = prop.Parent.ToType();
-            var classType = TypeResolver.ByType(t );
-			return classType.TypeInfo.GetProperty(prop.Name, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-		}
+        /// <summary>
+        /// Convert CodeProperty2 to PropertyInfo. Cached
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public static PropertyInfo ToPropertyInfo(this CodeProperty2 prop) {
+            var t = prop.Parent.ToType();
+            var classType = TypeResolver.ByType(t);
+            return classType.TypeInfo.GetProperty(prop.Name, BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        }
 
-	    public static bool HasAttribute<T>(this MemberInfo mi) where T : Attribute
-	    {
-	        return mi.GetCustomAttributes<T>().Any();
-	    }
+        public static bool HasAttribute<T>(this MemberInfo mi) where T : Attribute {
+            return mi.GetCustomAttributes<T>().Any();
+        }
 
         //public static GeneratorOptionAttribute GetGeneratorAttribute(this MemberInfo mi)
         //{
@@ -568,154 +561,174 @@ namespace RgenLib.Extensions
         //    return (GeneratorOptionAttribute)genAttr;
         //}
 
-		public static Assembly GetAssemblyOfProjectItem(this EnvDTE.ProjectItem pi)
-		{
-			var path = pi.GetAssemblyPath();
+        public static Assembly GetAssemblyOfProjectItem(this EnvDTE.ProjectItem pi) {
+            var path = pi.GetAssemblyPath();
 
-			if (!string.IsNullOrEmpty(path))
-			{
-				return Assembly.LoadFrom(path);
-			}
-		    return null;
-		}
+            if (!string.IsNullOrEmpty(path)) {
+                return Assembly.LoadFrom(path);
+            }
+            return null;
+        }
 
-		public static string GetAssemblyPath(this EnvDTE.ProjectItem pi)
-		{
+        public static string GetAssemblyPath(this EnvDTE.ProjectItem pi) {
 
-			//var assemblyName = pi.ContainingProject.Properties.Cast<Property>().FirstOrDefault(x => x.Name == "AssemblyName").SelectOrDefault(x => x.Value);
+            //var assemblyName = pi.ContainingProject.Properties.Cast<Property>().FirstOrDefault(x => x.Name == "AssemblyName").SelectOrDefault(x => x.Value);
 
             return pi.ContainingProject.GetAssemblyPath();
-		}
+        }
 
-		/// <summary>
-		/// Currently unused. If we require a succesful build, a project that requires succesful generation would never build, catch-22
-		/// </summary>
-		/// <param name="vsProject"></param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static string GetAssemblyPath(this Project vsProject)
-		{
-			var fullPath = vsProject.Properties.Item("FullPath").Value.ToString();
-			var outputPath = vsProject.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
-			var outputDir = Path.Combine(fullPath, outputPath);
-			var outputFileName = vsProject.Properties.Item("OutputFileName").Value.ToString();
-			var assemblyPath = Path.Combine(outputDir, outputFileName);
-			return assemblyPath;
-		}
+        /// <summary>
+        /// Currently unused. If we require a succesful build, a project that requires succesful generation would never build, catch-22
+        /// </summary>
+        /// <param name="vsProject"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public static string GetAssemblyPath(this Project vsProject) {
+            var fullPath = vsProject.Properties.Item("FullPath").Value.ToString();
+            var outputPath = vsProject.ConfigurationManager.ActiveConfiguration.Properties.Item("OutputPath").Value.ToString();
+            var outputDir = Path.Combine(fullPath, outputPath);
+            var outputFileName = vsProject.Properties.Item("OutputFileName").Value.ToString();
+            var assemblyPath = Path.Combine(outputDir, outputFileName);
+            return assemblyPath;
+        }
 
         const string TypeWithoutQualifierPattern = @"(?<=\.?)[^\.]+?$";
-		private static readonly Regex TypeWithoutQualifierRegex = new Regex(TypeWithoutQualifierPattern, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
-		public static string StripQualifier(this string s)
-		{
-			var stripped = TypeWithoutQualifierRegex.Match(s).Value;
-			return stripped;
-		}
+        private static readonly Regex TypeWithoutQualifierRegex = new Regex(TypeWithoutQualifierPattern, RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
+        public static string StripQualifier(this string s) {
+            var stripped = TypeWithoutQualifierRegex.Match(s).Value;
+            return stripped;
+        }
 
-		public static T ParseAsEnum<T>(this string qualifiedName, T defaultValue) where T: struct
-		{
-			if (string.IsNullOrEmpty(qualifiedName))
-			{
-				return defaultValue;
-			}
-			T res;
-			Enum.TryParse(qualifiedName.StripQualifier(),out res);
-			return res;
-		}
+        public static T ParseAsEnum<T>(this string qualifiedName, T defaultValue) where T : struct {
+            if (string.IsNullOrEmpty(qualifiedName)) {
+                return defaultValue;
+            }
+            T res;
+            Enum.TryParse(qualifiedName.StripQualifier(), out res);
+            return res;
+        }
 
-		public static T GetOrInit<T>(ref T x, Func<T> initFunc) where T : class
-		{
-		    return x ?? (x = initFunc());
-		}
+        public static T GetOrInit<T>(ref T x, Func<T> initFunc) where T : class {
+            return x ?? (x = initFunc());
+        }
 
-	    /// <summary>
-		/// Create type instance from string
-		/// </summary>
-		/// <param name="type"></param>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		/// <remarks></remarks>
-		public static object ConvertFromString(this Type type, string value)
-		{
-			return TypeDescriptor.GetConverter(type).ConvertFromString(value);
-		}
+        /// <summary>
+        /// Create type instance from string
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        /// <remarks></remarks>
+        public static object ConvertFromString(this Type type, string value) {
+            return TypeDescriptor.GetConverter(type).ConvertFromString(value);
+        }
 
-		/// <summary>
-		/// Set property value from string representation
-		/// </summary>
-		/// <param name="propInfo"></param>
-		/// <param name="obj"></param>
-		/// <param name="value"></param>
-		/// <remarks></remarks>
-		public static void SetValueFromString(this PropertyInfo propInfo, object obj, string value)
-		{
-		    var setValue = propInfo.PropertyType == typeof(Version) ? 
-                                Version.Parse(value) : 
+        /// <summary>
+        /// Set property value from string representation
+        /// </summary>
+        /// <param name="propInfo"></param>
+        /// <param name="obj"></param>
+        /// <param name="value"></param>
+        /// <remarks></remarks>
+        public static void SetValueFromString(this PropertyInfo propInfo, object obj, string value) {
+            var setValue = propInfo.PropertyType == typeof(Version) ?
+                                Version.Parse(value) :
                                 propInfo.PropertyType.ConvertFromString(value);
-		    propInfo.SetValue(obj, setValue);
-		}
+            propInfo.SetValue(obj, setValue);
+        }
 
-	    public static void AddInterfaceIfNotExists(this CodeClass2 cls, string interfaceName)
-		{
-		    try
-		    {
-		      
-		        if (!(cls.ImplementedInterfaces.OfType<CodeInterface>().Any(x => x.FullName == interfaceName)))
-		        {
-		            cls.AddImplementedInterface(interfaceName);
-		        }
-		    }
-		    catch (Exception e)
-		    {
+        public static void AddInterfaceIfNotExists(this CodeClass2 cls, string interfaceName) {
+            try {
+
+                if (!(cls.ImplementedInterfaces.OfType<CodeInterface>().Any(x => x.FullName == interfaceName))) {
+                    cls.AddImplementedInterface(interfaceName);
+                }
+            }
+            catch (Exception e) {
                 MessageBox.Show("The added interface has to exists in the project." + e);
 
-		    }
-		}
+            }
+        }
 
-	    public static string GetDefaultNamespace(this EnvDTE.ProjectItem item)
-	    {
-	        return item.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
-	    }
+        public static string GetDefaultNamespace(this EnvDTE.ProjectItem item) {
+            return item.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
+        }
 
-		public static string DotJoin(this string s, params string[] segments)
-		{
-			var all = new[] {s}.Concat(segments).ToArray();
-			return string.Join(".", all);
-		}
+        public static string DotJoin(this string s, params string[] segments) {
+            var all = new[] { s }.Concat(segments).ToArray();
+            return string.Join(".", all);
+        }
 
 
-		/// <summary>
-		/// Returns CodeTypeRef.AsFullName, if null, returns CodeTypeRef.AsString
-		/// </summary>
-		/// <param name="ctr"></param>
-		/// <returns></returns>
-		/// <remarks>
-		/// If there's compile error AsFullName will be null
-		/// </remarks>
-		public static string SafeFullName(this CodeTypeRef ctr)
-		{
-			return (ctr.AsFullName ?? ctr.AsString);
-		}
+        /// <summary>
+        /// Returns CodeTypeRef.AsFullName, if null, returns CodeTypeRef.AsString
+        /// </summary>
+        /// <param name="ctr"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// If there's compile error AsFullName will be null
+        /// </remarks>
+        public static string SafeFullName(this CodeTypeRef ctr) {
+            return (ctr.AsFullName ?? ctr.AsString);
+        }
 
-	   static public bool AllPropertiesEquals<T>(this T obj1, T obj2)
-	   {
-	       var typeCache = TypeResolver.ByType(typeof (T));
-	       var props = typeCache.GetProperties();
-	       return props.Any(p => !p.GetValue(obj1).Equals(p.GetValue(obj2)));
-	   }
+        static public bool AllPropertiesEquals<T>(this T obj1, T obj2) {
+            var typeCache = TypeResolver.ByType(typeof(T));
+            var props = typeCache.GetProperties();
+            return props.Any(p => !p.GetValue(obj1).Equals(p.GetValue(obj2)));
+        }
+
+        #region GetTemplateOutput
 
 
-	    static public string GetTemplateOutput<T>(this Action<StringWriter, T> templateAction, T param1)
-	    {
-	        var output = new StringWriter();
-	        templateAction(output, param1);
-	        return output.ToString();
-	    }
+        //public static string GetTemplateOutput<T>(this Action<StringWriter, T> templateAction, T param1)
+        //{
+        //    var output = new StringWriter();
+        //    templateAction(output, param1);
+        //    return output.ToString();
+        //}
 
-        static public string GetTemplateOutput<T1,T2>(this Action<StringWriter, T1,T2> templateAction, T1 param1, T2 param2) {
+        //public static string GetTemplateOutput<T1, T2>(this Action<StringWriter, T1, T2> templateAction, T1 param1,
+        //    T2 param2)
+        //{
+        //    var output = new StringWriter();
+        //    templateAction(output, param1, param2);
+        //    return output.ToString();
+        //}
+
+        //public static string GetTemplateOutput<T1, T2, T3>(this Action<StringWriter, T1, T2, T3> templateAction, T1 param1,
+        //    T2 param2, T3 param3)
+        //{
+        //    var output = new StringWriter();
+        //    templateAction(output, param1, param2, param3);
+        //    return output.ToString();
+        //}
+
+        //public static string GetTemplateOutput<T1, T2, T3, T4>(this Action<StringWriter, T1, T2, T3, T4> templateAction,
+        //    T1 param1, T2 param2, T3 param3, T4 param4)
+        //{
+        //    var output = new StringWriter();
+        //    templateAction(output, param1, param2, param3, param4);
+        //    return output.ToString();
+        //}
+
+        //public static string GetTemplateOutput<T1, T2, T3, T4, T5>(
+        //    this Action<StringWriter, T1, T2, T3, T4, T5> templateAction, T1 param1, T2 param2, T3 param3, T4 param4,
+        //    T5 param5)
+        //{
+        //    var output = new StringWriter();
+        //    templateAction(output, param1, param2, param3, param4, param5);
+        //    return output.ToString();
+        //}
+
+        public static string GetTemplateOutput(this Action<StringWriter> templateAction) {
             var output = new StringWriter();
-            templateAction(output, param1, param2);
+            templateAction(output);
             return output.ToString();
         }
-	}
+
+        #endregion
+
+    }
 
 }

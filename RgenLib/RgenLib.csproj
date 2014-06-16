@@ -108,6 +108,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeRendererEx.cs" />
+    <Compile Include="Extensions\CodeRenderer.cs" />
     <Compile Include="Extensions\Debug.cs" />
     <Compile Include="Extensions\ElementAtCursor.cs" />
     <Compile Include="Extensions\General.cs" />
@@ -164,6 +166,12 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Attributes\Attributes.csproj">
+      <Project>{1CF4996B-DA27-476A-9951-105241589F9C}</Project>
+      <Name>Attributes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

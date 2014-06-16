@@ -12,44 +12,74 @@ using RgenLib.TaggedSegment.Json;
 using TextPoint = EnvDTE.TextPoint;
 
 namespace RgenLib.TaggedSegment {
-    public partial class Manager<T> where T : TaggedCodeRenderer, new() {
+    public partial class Manager<TRenderer> where TRenderer : TaggedCodeRenderer, new() {
 
         /// <summary>
         /// Holds information required to generate code segments
         /// </summary>
         /// <remarks></remarks>
         public class Writer {
-            private readonly Manager<T> _Manager;
+            private readonly Manager<TRenderer> _manager;
 
-            public Manager<T> Manager { get { return _Manager; } }
+            public Manager<TRenderer> Manager { get { return _manager; } }
             public OptionTag OptionTag { get; set; }
 
-            public Writer(Manager<T> manager) {
-                _Manager = manager;
+            public Writer(Manager<TRenderer> manager) {
+                _manager = manager;
+
+            }
+            public Writer(Manager<TRenderer> manager, CodeClass2 cc): this(manager) {
+                Class = cc;
+
+            }
+            public Writer(Manager<TRenderer> manager, CodeClass2 cc, CodeClass2 triggeringBase)
+                : this(manager,cc) {
+                    TriggeringBaseClass = triggeringBase;
 
             }
 
+            public Writer(Writer sourceWriter)
+            {
+                this.CopyPropertiesFrom(sourceWriter);
+            }
+
+            /// <summary>
+            /// Clone with new option
+            /// </summary>
+            /// <param name="optionTag">New Option</param>
+            /// <returns></returns>
+            public Writer Clone(OptionTag optionTag)
+            {
+                var clone = Clone();
+                clone.OptionTag = optionTag;
+                return clone;
+            }
             /// <summary>
             /// Create a new writer with the same Class, TriggeringBaseClass and GeneratorAttribute
             /// </summary>
-            /// <param name="parentWriter">
             /// source of properties to be copied
-            /// </param>
-            /// <param name="segCategory"></param>
             /// <remarks></remarks>
-            public Writer(Writer parentWriter, string segCategory = "") {
-                Class = parentWriter.Class;
-                TriggeringBaseClass = parentWriter.TriggeringBaseClass;
-                //Clone instead of reusing parent's attribute, because they may have different property values
-                OptionTag = (OptionTag)parentWriter.OptionTag.MemberwiseClone();
-                Category = segCategory;
+            public Writer Clone()
+            {
+                var newWriter = new Writer(this.Manager);
+                newWriter.CopyPropertiesFrom(this);
+                return newWriter;
+            }
+
+            private void CopyPropertiesFrom(Writer source)
+            {
+                Class = this.Class;
+                TriggeringBaseClass = TriggeringBaseClass;
+                    //Clone instead of reusing parent's attribute, because they may have different property values
+                OptionTag = (OptionTag) OptionTag.MemberwiseClone();
+                Category = Category;
             }
 
             public TagFormat TagFormat { get { return Manager.TagFormat; } }
             public string Category { get; set; }
             public CodeClass2 TriggeringBaseClass { get; set; }
             public CodeClass2 Class { get; set; }
-            //public T Renderer { get; set; }
+            //public TRenderer Renderer { get; set; }
             public TextPoint SearchStart { get; set; }
             public TextPoint SearchEnd { get; set; }
             public TextPoint InsertStart { get; set; }
@@ -165,7 +195,7 @@ namespace RgenLib.TaggedSegment {
 
             }
 
-            public string GenTaggedRegionText(string regionName) {
+            private string GenTaggedRegionText(string regionName) {
 
                 var res = string.Format("#region {0}{1}{2}{1}{3}{1}", regionName, Environment.NewLine, Content, "#endregion");
                 return res;
@@ -241,6 +271,7 @@ namespace RgenLib.TaggedSegment {
                 return true;
             }
 
+            
         }
 
     }

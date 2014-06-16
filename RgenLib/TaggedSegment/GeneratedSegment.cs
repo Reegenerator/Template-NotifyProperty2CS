@@ -10,7 +10,7 @@ using RgenLib.Extensions;
 using RgenLib.TaggedSegment.Json;
 
 namespace RgenLib.TaggedSegment {
-    public partial class Manager<T> where T : TaggedCodeRenderer, new() {
+    public partial class Manager<TRenderer> where TRenderer : TaggedCodeRenderer, new() {
         public class GeneratedSegment : Tag {
 
             static GeneratedSegment() {
@@ -43,7 +43,7 @@ namespace RgenLib.TaggedSegment {
 
             }
 
-            public bool IsAnyOutdated(Writer info) {
+            static public bool IsAnyOutdated(Writer info) {
                 var segments = Find(info);
                 return !segments.Any() || segments.Any(x => x.IsOutdated(info.OptionTag));
             }
@@ -111,7 +111,7 @@ namespace RgenLib.TaggedSegment {
                 var rendererAttr = TagPrototype.Attribute(XmlRendererAttributeName);
                 var tagName = TagPrototype.Name.LocalName;
 
-                var templateName = typeof(T).Name;
+                var templateName = typeof(TRenderer).Name;
                 _regexDict.Add(TagFormat.Xml, new Dictionary<SegmentTypes, Regex>());
                 var xmlCommentPattern = string.Format(xmlCommentPatternFormat, tagName, rendererAttr.Name, rendererAttr.Value, Constants.CodeCommentPrefix);
                 _regexDict[TagFormat.Xml].Add(SegmentTypes.Statements,

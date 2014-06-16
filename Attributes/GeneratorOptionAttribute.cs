@@ -16,6 +16,9 @@ namespace Attributes
     {
 
         public Version Version { get; set; }
-
+        public virtual bool IsIgnored { get; set; }
+        public virtual bool ApplyToDerivedClasses {get;set;}
     }
+
+
 }

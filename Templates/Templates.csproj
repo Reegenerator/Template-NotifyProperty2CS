@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Data" />
     <Reference Include="EnvDTE" />
@@ -70,6 +71,13 @@
     <Compile Include="NotifyProperty.rgt.cs">
       <DependentUpon>NotifyProperty.rgt</DependentUpon>
     </Compile>
+    <Compile Include="NotifyPropertyLibrary.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NotifyPropertyLibrary.rgt</DependentUpon>
+    </Compile>
+    <Compile Include="NotifyPropertyLibrary.rgt.cs">
+      <DependentUpon>NotifyPropertyLibrary.rgt</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +85,10 @@
     <None Include="NotifyProperty.rgt">
       <Generator>RgenTemplate</Generator>
       <LastGenOutput>NotifyProperty.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="NotifyPropertyLibrary.rgt">
+      <Generator>RgenTemplate</Generator>
+      <LastGenOutput>NotifyPropertyLibrary.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
   <ItemGroup>
