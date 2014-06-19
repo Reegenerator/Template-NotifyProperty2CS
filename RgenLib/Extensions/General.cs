@@ -107,7 +107,8 @@ namespace RgenLib.Extensions {
             foreach (var arg in codeAttr.GetArguments())
             {
 
-                ((PropertyInfo) typeCache[arg.Name]).SetValue(attr, ParseAttributeProperty<TAttr>(arg.Value));
+                var propInfo =(PropertyInfo) typeCache[arg.Name];
+                    propInfo.SetValue(attr, ParseAttributeProperty(propInfo.PropertyType, arg.Value));
             }
             return attr;
         }
@@ -130,18 +131,18 @@ namespace RgenLib.Extensions {
         /// <summary>
         /// Parse Attribute Argument into the actual string value
         /// </summary>
+        /// <param name="propType"></param>
         /// <param name="value"></param>
         /// <remarks>
         /// Attribute argument is presented exactly as it was typed
         /// Ex: SomeArg:="Test" would result in the Argument.Value "Test" (with quote)
         /// Ex: SomeArg:=("Test") would result in the Argument.Value ("Test") (with parentheses and quote)
         /// </remarks>
-        private static T ParseAttributeProperty<T>(string value) {
+        private static object ParseAttributeProperty(Type propType, string value) {
             try
             {
-                if (value == null) return default(T);
+                if (value == null) return GetDefaultValue(propType);
                 object parsed = null;
-                var propType = typeof(T);
                 if (propType.IsEnum) {
                     parsed = value.StripQualifier();
                 }
@@ -151,7 +152,7 @@ namespace RgenLib.Extensions {
                 else {
                     parsed = value;
                 }
-                return (T)parsed;
+                return parsed;
             }
             catch (Exception ex)
             {
@@ -159,6 +160,16 @@ namespace RgenLib.Extensions {
                 throw;
             }
         
+        }
+
+        static object GetDefaultValue(Type t)
+        {
+            return t.IsValueType ? Activator.CreateInstance(t) : null;
+        }
+
+        private static T ParseAttributeProperty<T>(string value)
+        {
+            return (T)ParseAttributeProperty(typeof (T), value);
         }
 
         static public TResult GetAttributeProperty<TAttr, TResult>(this  CodeElement2 ce, Expression<Func<TAttr, TResult>> memberExpr)

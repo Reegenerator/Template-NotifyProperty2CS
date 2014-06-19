@@ -106,7 +106,7 @@ namespace RgenLib.TaggedSegment {
 
             [JsonProperty(PropertyName = RegenModePropertyName)]
             [XmlAttribute(RegenModePropertyName)]
-            [JsonConverter(typeof(NullDefaultEnumConverter))]
+            [JsonConverter(typeof(StringEnumConverter))]
             public RegenModes RegenMode { get; set; }
 
             public TagTypes TagType { get; set; }
