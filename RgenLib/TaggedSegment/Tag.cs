@@ -21,7 +21,8 @@ namespace RgenLib.TaggedSegment {
                 InsertPoint
             }
             protected Tag() {
-                RegenMode = RegenModes.Never;
+                RegenMode = RegenModes.Default;
+                OptionAttribute = new TOptionAttr();
             }
             #region TagGeneration
             public const string XmlTagName = "Gen";
@@ -90,10 +91,14 @@ namespace RgenLib.TaggedSegment {
             [JsonProperty(TemplateNamePropertyName)]
             public string TemplateName { get { return _templateName; } }
 
+
+            /// <summary>
+            /// The declared attribute used to define option for generation. If none was declared this variable contains an instance with default values.
+            /// </summary>
             public TOptionAttr OptionAttribute { get; set; }
 
         
-   
+    
             
             [JsonProperty(PropertyName = CategoryPropertyName)]
             [XmlAttribute(CategoryPropertyName)]
@@ -101,7 +106,7 @@ namespace RgenLib.TaggedSegment {
 
             [JsonProperty(PropertyName = RegenModePropertyName)]
             [XmlAttribute(RegenModePropertyName)]
-            [JsonConverter(typeof(StringEnumConverter))]
+            [JsonConverter(typeof(NullDefaultEnumConverter))]
             public RegenModes RegenMode { get; set; }
 
             public TagTypes TagType { get; set; }
@@ -122,7 +127,11 @@ namespace RgenLib.TaggedSegment {
                 return (Tag)base.MemberwiseClone();
             }
 
-
+            //public TResult GetOption< TResult>(Func<TOptionAttr, TResult> propExpr, TResult defaultValue =default(TResult))
+            //{
+            //    if (OptionAttribute == null) return defaultValue;
+            //    return propExpr(OptionAttribute);
+            //}
 
 
         }

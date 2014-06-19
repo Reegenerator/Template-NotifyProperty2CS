@@ -150,7 +150,7 @@ namespace RgenLib.TaggedSegment {
                 serializer.Serialize(writer, OptionTag);
                 writer.Close();
                 var json = stringWriter.ToString();
-                return string.Format("{0}:{1}", Constants.JsonTagPrefix, json);
+                return string.Format("{2} {0}:{1}", Constants.JsonTagPrefix, json, TagNote);
             }
 
             public XElement GenXmlTag() {

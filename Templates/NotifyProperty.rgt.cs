@@ -38,7 +38,9 @@ namespace Templates {
             get { return this.ProjectItem.Project.DefaultNamespace.DotJoin(NotifyPropertyLibrary.INotifierName); }
         }
 
-        public NotifyProperty() {
+        public NotifyProperty()
+        {
+            
             //var tagName = (new NotifyPropertyChanged_GenAttribute()).TagName;
             _manager = new ManagerType(TagFormat.Json);
         }
@@ -139,7 +141,7 @@ namespace Templates {
                     GenerateInClass(classWriter);
 
                     //!if also doing derivedClasses
-                    bool applyToSubclasses = classWriter.OptionTag.OptionAttribute.IfNotNull( x=> x.ApplyToDerivedClasses);
+                    bool applyToSubclasses = classWriter.OptionTag.OptionAttribute.ApplyToDerivedClasses;
                     if (applyToSubclasses) {
 
                         //!for each subclass
@@ -232,19 +234,19 @@ namespace Templates {
             var propAttrs = prop.GetText(vsCMPart.vsCMPartAttributesWithDelimiter);
             //Interface implementation 
             var interfaceImpl = prop.GetInterfaceImplementation();
+          
 
 
             var writer = new ManagerType.Writer(parentWriter) {
                 SegmentType = SegmentTypes.Region,
-                TagNote = string.Format("{0} auto expanded by", prop.Name),
-                OptionTag = { RegenMode = RegenModes.Never },
+                TagNote = string.Format("{0} expanded by", prop.Name),
+                //OptionTag,
                 Content = General.GetTemplateOutput(output =>
                                GenProperty(output, prop.Name, prop.Type.SafeFullName(), comment, propAttrs, interfaceImpl)
                           )
             };
             //only do this once, since once it is expanded it will no longer be detected as auto property
-
-
+      
 
             //Replace all code starting from comment to endPoint of the property
             const int options = (int)(vsEPReplaceTextOptions.vsEPReplaceTextAutoformat |
@@ -312,13 +314,15 @@ namespace Templates {
             var memberName = optionTag.CodeElement.Name;
             //!Parent can be either CodeFunction(only for ExtraNotifications) or CodeProperty
             string code = null;
-
+            var note = "";
             switch (optionTag.OptionAttribute.GenerationType) {
                 case NotifyPropertyOptionAttribute.GenerationTypes.NotifyOnly:
                     //Only notification
+                    note = string.Format("Notify {0}", memberName);
                     code = string.Format(NotifyChangedFormat, memberName);
                     break;
                 default:
+                    note = string.Format("SetPropertyAndNotify {0}", memberName);
                     code = string.Format("this.SetPropertyAndNotify(ref _{0}, value, \"{0}\");", memberName);
                     break;
             }
@@ -334,11 +338,12 @@ namespace Templates {
             var codeElement = (CodeFunction2)((prop != null) ? prop.Setter : (CodeFunction2)optionTag.CodeElement);
             var memberWriter = new ManagerType.Writer(parentWriter)
             {
+                TagNote= note,
                 OptionTag = optionTag, 
                 SearchStart = codeElement.StartPoint, 
                 SearchEnd = codeElement.EndPoint, 
                 Content = code, 
-                SegmentType = SegmentTypes.Statements
+                SegmentType = SegmentTypes.Region
             };
 
             //Find insertion point
@@ -380,16 +385,19 @@ namespace Templates {
             var dpFields = tsWriter.Class.GetDependencyProperties();
 
 
-            Func<ManagerType.OptionTag, bool> notDpField = x => !(dpFields.Any((dp) => dp.Name == x.CodeElement.Name + "Property"));
+            Func<ManagerType.OptionTag, bool> notDpField = x =>
+            {
+                bool res = !(dpFields.Any((dp) => dp.Name == x.CodeElement.Name + "Property"));
+                return res;
+            };
             Func<ManagerType.OptionTag, bool> notIgnored = x =>
             {
-                var attr = (GeneratorOptionAttribute) x.OptionAttribute;
-                return attr !=null && !attr.IsIgnored;
+                var attr = x.OptionAttribute;
+                return attr ==null || !attr.IsIgnored;
             };
 
 
             var propsWithSetters = propOptions.Where(x => ((CodeProperty2)x.CodeElement).Setter != null);
-
             //?filter out property for DependencyProperties 
             var validMembers = funcOptions.Concat(propsWithSetters.Where(notDpField).Where(notIgnored));
 
@@ -409,7 +417,7 @@ namespace Templates {
                 //if triggered by base class, the notify functions must have already been created
                 return;
             }
-            if (tsWriter.Class.Members.Cast<CodeElement>().Any()) //?if there's no member, there won't be any properties. Skip
+            if (!tsWriter.Class.Members.Cast<CodeElement>().Any()) //?if there's no member, there won't be any properties. Skip
 			{
                 return;
             }
@@ -430,7 +438,7 @@ namespace Templates {
             else {
                 code = General.GetTemplateOutput((output) => GenFunctions(output, tsWriter.Class.FullName, true));
             }
-
+            
             var insertPoint = tsWriter.Class.GetStartPoint(vsCMPart.vsCMPartBody).CreateEditPoint();
             insertPoint.StartOfLine();
             //var body = writer.Class.GetText(vsCMPart.vsCMPartBody);
@@ -458,7 +466,6 @@ namespace Templates {
 
         }
         public void GenerateInClass(ManagerType.Writer writer) {
-
             GenerateNotifyFunctions(writer);
             ExpandAutoProperties(writer);
             GenInMembers(writer);
@@ -480,7 +487,9 @@ namespace Templates {
             }
         }
 
-        public override RenderResults Render() {
+        public override RenderResults Render()
+        {
+            Debug.SetTraceListener(OutputPaneTraceListener);
             this.RenderWithinTarget();
             return null; // new RenderResults();
             //"'Because of the way custom tool works a file has to be generated. This file can be safely ignored.");

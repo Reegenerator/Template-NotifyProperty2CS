@@ -53,6 +53,7 @@ namespace RgenLib.TaggedSegment {
             #region Regex
             public const string RegionBeginKeyword = "#region";
             public const string RegionEndKeyword = "#endregion";
+      
 
             // ReSharper disable StaticFieldInGenericType
             private static Dictionary<TagFormat, Dictionary<SegmentTypes, Regex>> _regexDict;
@@ -88,7 +89,7 @@ namespace RgenLib.TaggedSegment {
                             [^<>]*#Match everything but tag symbols
                             (?<!/)>)\s*#Match only > but not />
                         (?<content>.*?)(?<!</{0}>)
-                        {3}(?<tagend></Gen>)\s*
+                        {3}(?<tagend></{0}>)\s*
                     )";
 
                 //quotes are doubled to escape them inside literal string
@@ -114,13 +115,17 @@ namespace RgenLib.TaggedSegment {
                 var tagName = TagPrototype.Name.LocalName;
 
                 var templateName = typeof(TRenderer).Name;
+                //xml, statement
+
                 _regexDict.Add(TagFormat.Xml, new Dictionary<SegmentTypes, Regex>());
                 var xmlCommentPattern = string.Format(xmlCommentPatternFormat, tagName, rendererAttr.Name, rendererAttr.Value, Constants.CodeCommentPrefix);
                 _regexDict[TagFormat.Xml].Add(SegmentTypes.Statements,
                     new Regex(xmlCommentPattern, Constants.DefaultRegexOption));
+                //xml , region
                 var xmlRegPattern = string.Format(xmlRegionPatternFormat, tagName, rendererAttr.Name, rendererAttr.Value, RegionBeginKeyword, RegionEndKeyword);
                 _regexDict[TagFormat.Xml].Add(SegmentTypes.Region, new Regex(xmlRegPattern, Constants.DefaultRegexOption));
 
+                //json, region
                 _regexDict.Add(TagFormat.Json, new Dictionary<SegmentTypes, Regex>());
                 var jsonRegPattern = string.Format(jsonRegionPatternFormat,
                                                     Constants.JsonTagPrefix,
@@ -128,6 +133,8 @@ namespace RgenLib.TaggedSegment {
                                                     templateName,
                                                     RegionBeginKeyword, RegionEndKeyword);
                 _regexDict[TagFormat.Json].Add(SegmentTypes.Region, new Regex(jsonRegPattern, Constants.DefaultRegexOption));
+
+              
             }
             #endregion
 
@@ -299,7 +306,7 @@ namespace RgenLib.TaggedSegment {
             /// Not using DTE Find because it has to change params of current find dialog, might screw up normal find usage
             ///  </remarks>
             static public GeneratedSegment[] FindSegments(Writer writer) {
-
+               
                 var regex = _regexDict[writer.TagFormat][writer.SegmentType];
                 //Using regex in FindPattern does
                 var text = writer.GetSearchText();

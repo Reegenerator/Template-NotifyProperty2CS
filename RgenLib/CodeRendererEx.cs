@@ -9,6 +9,7 @@ using Kodeo.Reegenerator.Generators;
 
 namespace RgenLib {
     public abstract class CodeRendererEx : CodeRenderer {
+
         public readonly string Newline = Environment.NewLine;
         public EnvDTE.DTE Dte {
             get {
