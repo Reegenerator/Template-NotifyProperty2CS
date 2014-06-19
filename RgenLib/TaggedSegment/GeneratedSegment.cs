@@ -10,7 +10,9 @@ using RgenLib.Extensions;
 using RgenLib.TaggedSegment.Json;
 
 namespace RgenLib.TaggedSegment {
-    public partial class Manager<TRenderer> where TRenderer : TaggedCodeRenderer, new() {
+    public partial class Manager<TRenderer, TOptionAttr>
+        where TRenderer : TaggedCodeRenderer, new()
+        where TOptionAttr : Attribute, new() {
         public class GeneratedSegment : Tag {
 
             static GeneratedSegment() {

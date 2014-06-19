@@ -12,27 +12,29 @@ using RgenLib.TaggedSegment.Json;
 using TextPoint = EnvDTE.TextPoint;
 
 namespace RgenLib.TaggedSegment {
-    public partial class Manager<TRenderer> where TRenderer : TaggedCodeRenderer, new() {
+    public partial class Manager<TRenderer, TOptionAttr>
+        where TRenderer : TaggedCodeRenderer, new()
+        where TOptionAttr : Attribute, new() {
 
         /// <summary>
         /// Holds information required to generate code segments
         /// </summary>
         /// <remarks></remarks>
         public class Writer {
-            private readonly Manager<TRenderer> _manager;
+            private  Manager<TRenderer, TOptionAttr> _manager;
 
-            public Manager<TRenderer> Manager { get { return _manager; } }
+            public Manager<TRenderer, TOptionAttr> Manager { get { return _manager; } }
             public OptionTag OptionTag { get; set; }
 
-            public Writer(Manager<TRenderer> manager) {
+            public Writer(Manager<TRenderer, TOptionAttr> manager) {
                 _manager = manager;
-
+                OptionTag = new OptionTag();
             }
-            public Writer(Manager<TRenderer> manager, CodeClass2 cc): this(manager) {
+            public Writer(Manager<TRenderer, TOptionAttr> manager, CodeClass2 cc): this(manager) {
                 Class = cc;
 
             }
-            public Writer(Manager<TRenderer> manager, CodeClass2 cc, CodeClass2 triggeringBase)
+            public Writer(Manager<TRenderer, TOptionAttr> manager, CodeClass2 cc, CodeClass2 triggeringBase)
                 : this(manager,cc) {
                     TriggeringBaseClass = triggeringBase;
 
@@ -68,11 +70,13 @@ namespace RgenLib.TaggedSegment {
 
             private void CopyPropertiesFrom(Writer source)
             {
-                Class = this.Class;
-                TriggeringBaseClass = TriggeringBaseClass;
+                _manager = source.Manager;
+                Class = source.Class;
+                TriggeringBaseClass = source.TriggeringBaseClass;
                     //Clone instead of reusing parent's attribute, because they may have different property values
-                OptionTag = (OptionTag) OptionTag.MemberwiseClone();
-                Category = Category;
+
+                OptionTag = (OptionTag)source.OptionTag.MemberwiseClone();
+                Category = source.Category;
             }
 
             public TagFormat TagFormat { get { return Manager.TagFormat; } }
@@ -202,29 +206,39 @@ namespace RgenLib.TaggedSegment {
             }
 
 
+
+
             public string GenText() {
-                OptionTag.GenerateDate = DateTime.Now;
-                switch (Manager.TagFormat) {
-                    case TagFormat.Xml:
-                        switch (SegmentType) {
-                            case SegmentTypes.Region:
-                                return GenTaggedRegionText(CreateXmlTaggedRegionName());
-                            case SegmentTypes.Statements:
-                                return CreateXmlTaggedCommentText();
-                            default:
-                                throw new Exception("Unknown SegmentType");
-                        }
-                    case TagFormat.Json:
-                        switch (SegmentType) {
-                            case SegmentTypes.Region:
-                                return GenTaggedRegionText(GenJsonTag());
-                            case SegmentTypes.Statements:
-                                return Constants.CodeCommentPrefix + GenJsonTag();
-                            default:
-                                throw new Exception("Unknown SegmentType");
-                        }
-                    default:
-                        throw new Exception("Unknown TagFormat");
+                try
+                {
+                    OptionTag.GenerateDate = DateTime.Now;
+                    switch (Manager.TagFormat) {
+                        case TagFormat.Xml:
+                            switch (SegmentType) {
+                                case SegmentTypes.Region:
+                                    return GenTaggedRegionText(CreateXmlTaggedRegionName());
+                                case SegmentTypes.Statements:
+                                    return CreateXmlTaggedCommentText();
+                                default:
+                                    throw new Exception("Unknown SegmentType");
+                            }
+                        case TagFormat.Json:
+                            switch (SegmentType) {
+                                case SegmentTypes.Region:
+                                    return GenTaggedRegionText(GenJsonTag());
+                                case SegmentTypes.Statements:
+                                    return Constants.CodeCommentPrefix + GenJsonTag();
+                                default:
+                                    throw new Exception("Unknown SegmentType");
+                            }
+                        default:
+                            throw new Exception("Unknown TagFormat");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.DebugHere(e);
+                    throw;
                 }
 
             }

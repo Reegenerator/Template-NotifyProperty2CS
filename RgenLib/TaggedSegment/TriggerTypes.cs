@@ -19,22 +19,4 @@
         /// </summary>
         CodeSnippet
     }
-    public enum TagTypes {
-        Generated,
-        InsertPoint
-    }
-
-
-    public enum RegenModes {
-        Default,
-        Never = Default,
-        OnVersionChanged,
-        Always
-    }
-
-    public enum TagFormat {
-        Default,
-        Json = Default,
-        Xml
-    }
 }

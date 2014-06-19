@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Attributes;
 using EnvDTE80;
 
@@ -6,14 +7,20 @@ namespace RgenLib.TaggedSegment {
     /// <summary>
     /// Parse and generate code wrapped with xml information, so it can be easily found and replaced 
     /// </summary>
-    /// <remarks></remarks>
-    public partial class Manager<TRenderer> where TRenderer : TaggedCodeRenderer, new() {
+    /// <remarks>
+    /// Factory for writer and tag
+    /// OptionAttribute cannot be more specific than System.Attribute, so the library does not rely on specific GeneratorOptionAttribute library
+    /// GeneratorOptionAttribute library has to be code free, so it will be as small as possible, 
+    /// as it will need to be deployed along with the application using template that refers to RgenLib
+    /// ></remarks>
+    public partial class Manager<TRenderer, TOptionAttr>
+        where TRenderer : TaggedCodeRenderer, new()
+        where TOptionAttr : Attribute, new() {
        
-        public Manager(TRenderer renderer, TagFormat tagFormat)
+        public Manager(TagFormat tagFormat)
         {
             _tagFormat = tagFormat;
-            _renderer = renderer;
-            _propertyToXml = XmlAttributeAttribute.GetPropertyToXmlAttributeTranslation(_renderer.OptionAttributeType);
+            _propertyToXml = XmlAttributeAttribute.GetPropertyToXmlAttributeTranslation(typeof(TOptionAttr));
 
         }
         private readonly TagFormat _tagFormat;
@@ -23,12 +30,8 @@ namespace RgenLib.TaggedSegment {
         }
 
         private readonly Dictionary<string, string> _propertyToXml;
-        private readonly TRenderer _renderer;
 
-        public TRenderer Renderer {
-            get { return _renderer; }
-        }
-
+     
         public Writer CreateWriter() {
             return new Writer(this);
         }
@@ -52,7 +55,7 @@ namespace RgenLib.TaggedSegment {
 
 
         public TypeCache OptionAttributeTypeCache {
-            get { return TypeResolver.ByType(_renderer.OptionAttributeType); }
+            get { return TypeResolver.ByType(typeof(TOptionAttr)); }
         }
 
 

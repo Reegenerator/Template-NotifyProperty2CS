@@ -7,7 +7,7 @@ using EnvDTE80;
 namespace RgenLib.Extensions {
     public static class ElementAtCursor {
 
-        static public CodeElement GetCodeElementAtCursor(DTE dte, vsCMElement elementType) {
+        static public CodeElement GetCodeElementAtCursor(this DTE dte, vsCMElement elementType) {
 
             try {
                 CodeElement objCodeElement = null;

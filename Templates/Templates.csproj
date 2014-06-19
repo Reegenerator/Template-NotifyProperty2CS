@@ -78,6 +78,7 @@
     <Compile Include="NotifyPropertyLibrary.rgt.cs">
       <DependentUpon>NotifyPropertyLibrary.rgt</DependentUpon>
     </Compile>
+    <Compile Include="NotifyPropertySnippet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

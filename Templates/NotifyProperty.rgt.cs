@@ -14,7 +14,7 @@ using RgenLib.TaggedSegment;
 using System.IO;
 using Constants = EnvDTE.Constants;
 using Debug = RgenLib.Extensions.Debug;
-using ManagerType = RgenLib.TaggedSegment.Manager<Templates.NotifyProperty>;
+using ManagerType = RgenLib.TaggedSegment.Manager<Templates.NotifyProperty, Attributes.NotifyPropertyOptionAttribute>;
 
 
 namespace Templates {
@@ -22,6 +22,7 @@ namespace Templates {
     /// To use this renderer, attach to the target file. And add AutoGenerateAttribute to the class
     /// </summary>
     /// <remarks></remarks>
+
     public partial class NotifyProperty {
 
         private ManagerType _manager;
@@ -39,7 +40,7 @@ namespace Templates {
 
         public NotifyProperty() {
             //var tagName = (new NotifyPropertyChanged_GenAttribute()).TagName;
-            _manager = new ManagerType(this, TagFormat.Json);
+            _manager = new ManagerType(TagFormat.Json);
         }
         public ManagerType Manager {
             get {
@@ -117,7 +118,7 @@ namespace Templates {
         /// </summary>
         /// <remarks></remarks>
         private void RenderWithinTarget() {
-            
+          
             var undoCtx = Dte.UndoContext;
             undoCtx.Open(OptionAttributeType.Name, false);
             try {
@@ -138,7 +139,8 @@ namespace Templates {
                     GenerateInClass(classWriter);
 
                     //!if also doing derivedClasses
-                    if (classWriter.OptionTag.OptionAttribute.ApplyToDerivedClasses) {
+                    bool applyToSubclasses = classWriter.OptionTag.OptionAttribute.IfNotNull( x=> x.ApplyToDerivedClasses);
+                    if (applyToSubclasses) {
 
                         //!for each subclass
                         foreach (var derivedC in cc.GetSubclasses()) {
@@ -182,14 +184,14 @@ namespace Templates {
 
             }
             catch (Exception ex) {
-                Debug.DebugHere();
+                Debug.DebugHere(ex);
                 if (undoCtx.IsOpen) {
                     undoCtx.SetAborted();
                 }
             }
         }
 
-        private CodeClass2[] GetValidClasses() {
+        protected virtual CodeClass2[] GetValidClasses() {
             //get only classes marked with the attribute
 
             var validClasses = (
@@ -267,7 +269,7 @@ namespace Templates {
         private string GenInMember_ExtraNotifications(ManagerType.OptionTag optionTag, ManagerType.Writer parentWriter) {
 
             //Render extra notifications (notifications for other related properties)
-            if (string.IsNullOrEmpty(optionTag.GetOptionAttribute<NotifyPropertyOptionAttribute>().ExtraNotifications)) {
+            if (string.IsNullOrEmpty(optionTag.OptionAttribute.ExtraNotifications)) {
                 return null;
             }
 
@@ -286,8 +288,7 @@ namespace Templates {
         public string[] GetValidatedExtraNotifications(ManagerType.Writer writer) {
 
             var propNames = new HashSet<string>(writer.Class.GetProperties().Select((x) => x.Name));
-            var optAttr = writer.OptionTag.GetOptionAttribute<NotifyPropertyOptionAttribute>();
-            var extraNotifications = optAttr.ExtraNotifications
+            var extraNotifications = writer.OptionTag.OptionAttribute.ExtraNotifications
                                         .Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
 
             var invalids = extraNotifications.Where((x) => !(propNames.Contains(x))).ToArray();
@@ -312,7 +313,7 @@ namespace Templates {
             //!Parent can be either CodeFunction(only for ExtraNotifications) or CodeProperty
             string code = null;
 
-            switch (optionTag.GetOptionAttribute<NotifyPropertyOptionAttribute>().GenerationType) {
+            switch (optionTag.OptionAttribute.GenerationType) {
                 case NotifyPropertyOptionAttribute.GenerationTypes.NotifyOnly:
                     //Only notification
                     code = string.Format(NotifyChangedFormat, memberName);
@@ -380,7 +381,11 @@ namespace Templates {
 
 
             Func<ManagerType.OptionTag, bool> notDpField = x => !(dpFields.Any((dp) => dp.Name == x.CodeElement.Name + "Property"));
-            Func<ManagerType.OptionTag, bool> notIgnored = x => x.;
+            Func<ManagerType.OptionTag, bool> notIgnored = x =>
+            {
+                var attr = (GeneratorOptionAttribute) x.OptionAttribute;
+                return attr !=null && !attr.IsIgnored;
+            };
 
 
             var propsWithSetters = propOptions.Where(x => ((CodeProperty2)x.CodeElement).Setter != null);
@@ -418,8 +423,9 @@ namespace Templates {
             if (ancestorImplementingINotifier != null) {
                 code = string.Format("'{0} already implemented by {1}", NotifyPropertyLibrary.INotifierName, ancestorImplementingINotifier.FullName);
             }
-            else if (ancestorImplementingINPC != null) {
-                code = string.Format("'{0} already implemented by {1}{2}{3}", ancestorImplementingINPC.FullName, INotifyPropertyChangedName, Environment.NewLine, GetIsolatedOutput(() => OutFunctions(tsWriter.Class.FullName, false)));
+            else if (ancestorImplementingINPC != null)
+            {
+                code = string.Format("'{0} already implemented by {1}{2}", ancestorImplementingINPC.FullName, INotifyPropertyChangedName, Environment.NewLine);
             }
             else {
                 code = General.GetTemplateOutput((output) => GenFunctions(output, tsWriter.Class.FullName, true));
@@ -460,7 +466,7 @@ namespace Templates {
         }
 
         private void AppendWarning(ManagerType.Writer writer) {
-            CodeProperty2[] autoProperties = writer.Class.GetAutoProperties().Where((x) => !((new NotifyPropertyChanged_GenAttribute(x)).IsIgnored)).ToArray();
+            CodeProperty2[] autoProperties = writer.Class.GetAutoProperties().Where(x => !((new ManagerType.OptionTag(x)).OptionAttribute.IsIgnored)).ToArray();
             //?Warn unprocesssed autoproperties
             if (autoProperties.Any()) {
                 writer.HasError = true;
@@ -475,8 +481,7 @@ namespace Templates {
         }
 
         public override RenderResults Render() {
-
-            RenderWithinTarget();
+            this.RenderWithinTarget();
             return null; // new RenderResults();
             //"'Because of the way custom tool works a file has to be generated. This file can be safely ignored.");
 

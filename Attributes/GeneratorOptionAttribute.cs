@@ -10,7 +10,8 @@ namespace Attributes
     /// BaseClass for Generator Attributes
     /// </summary>
     /// <remarks>
-    /// Created in separate Assembly so the render target project does not need to include the Reegenerator library code.
+    /// Created in separate Assembly so the render target project does not need to include the whole RgenLib
+    /// This should contain minimal code. Just properties to be processed by the template
     /// </remarks>
     public class GeneratorOptionAttribute : Attribute
     {

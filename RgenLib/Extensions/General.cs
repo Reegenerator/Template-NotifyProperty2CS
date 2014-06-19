@@ -137,18 +137,28 @@ namespace RgenLib.Extensions {
         /// Ex: SomeArg:=("Test") would result in the Argument.Value ("Test") (with parentheses and quote)
         /// </remarks>
         private static T ParseAttributeProperty<T>(string value) {
-            object parsed = null;
-            var propType = typeof(T);
-            if (propType.IsEnum) {
-                parsed = value.StripQualifier();
+            try
+            {
+                if (value == null) return default(T);
+                object parsed = null;
+                var propType = typeof(T);
+                if (propType.IsEnum) {
+                    parsed = value.StripQualifier();
+                }
+                else if (propType == typeof(string)) {
+                    parsed = value.Trim('\"');
+                }
+                else {
+                    parsed = value;
+                }
+                return (T)parsed;
             }
-            else if (propType == typeof(string)) {
-                parsed = value.Trim('\"');
+            catch (Exception ex)
+            {
+                Debug.DebugHere(ex);
+                throw;
             }
-            else {
-                parsed = value;
-            }
-            return (T)parsed;
+        
         }
 
         static public TResult GetAttributeProperty<TAttr, TResult>(this  CodeElement2 ce, Expression<Func<TAttr, TResult>> memberExpr)
@@ -681,45 +691,6 @@ namespace RgenLib.Extensions {
         #region GetTemplateOutput
 
 
-        //public static string GetTemplateOutput<T>(this Action<StringWriter, T> templateAction, T param1)
-        //{
-        //    var output = new StringWriter();
-        //    templateAction(output, param1);
-        //    return output.ToString();
-        //}
-
-        //public static string GetTemplateOutput<T1, T2>(this Action<StringWriter, T1, T2> templateAction, T1 param1,
-        //    T2 param2)
-        //{
-        //    var output = new StringWriter();
-        //    templateAction(output, param1, param2);
-        //    return output.ToString();
-        //}
-
-        //public static string GetTemplateOutput<T1, T2, T3>(this Action<StringWriter, T1, T2, T3> templateAction, T1 param1,
-        //    T2 param2, T3 param3)
-        //{
-        //    var output = new StringWriter();
-        //    templateAction(output, param1, param2, param3);
-        //    return output.ToString();
-        //}
-
-        //public static string GetTemplateOutput<T1, T2, T3, T4>(this Action<StringWriter, T1, T2, T3, T4> templateAction,
-        //    T1 param1, T2 param2, T3 param3, T4 param4)
-        //{
-        //    var output = new StringWriter();
-        //    templateAction(output, param1, param2, param3, param4);
-        //    return output.ToString();
-        //}
-
-        //public static string GetTemplateOutput<T1, T2, T3, T4, T5>(
-        //    this Action<StringWriter, T1, T2, T3, T4, T5> templateAction, T1 param1, T2 param2, T3 param3, T4 param4,
-        //    T5 param5)
-        //{
-        //    var output = new StringWriter();
-        //    templateAction(output, param1, param2, param3, param4, param5);
-        //    return output.ToString();
-        //}
 
         public static string GetTemplateOutput(this Action<StringWriter> templateAction) {
             var output = new StringWriter();
@@ -729,6 +700,11 @@ namespace RgenLib.Extensions {
 
         #endregion
 
+        public static TResult IfNotNull<TInput, TResult>(this TInput o, Func<TInput, TResult> evaluator, TResult defaultValue = default(TResult))
+         {
+            if (o == null) return default(TResult);
+            return evaluator(o);
+        }
     }
 
 }
