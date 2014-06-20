@@ -368,6 +368,8 @@ namespace Templates {
                 insertPoint.LineDown(1);
                 insertPoint.StartOfLine();
             }
+
+            Debug.DebugHere();
             memberWriter.InsertStart = insertPoint;
             memberWriter.InsertOrReplace(_alwaysInsert);
 
@@ -476,6 +478,7 @@ namespace Templates {
             ExpandAutoProperties(writer);
             GenInMembers(writer);
             AppendWarning(writer);
+            DebugWriteLine(writer.Status.ToString());
         }
 
         private void AppendWarning(ManagerType.Writer writer) {

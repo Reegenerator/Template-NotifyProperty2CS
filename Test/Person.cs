@@ -68,7 +68,7 @@ namespace Test {
         public System.String Address { get; set; }
 
 
-        [Attributes.NotifyPropertyOption(IsIgnored=true)]
+        [NotifyPropertyOption(IsIgnored=true)]
         public string Notes { get; set; }
 
         public int Value { get; set; }

@@ -150,7 +150,7 @@ namespace RgenLib.Extensions {
                     parsed = value.Trim('\"');
                 }
                 else {
-                    parsed = value;
+                    parsed =Convert.ChangeType(value,propType);
                 }
                 return parsed;
             }
@@ -169,7 +169,15 @@ namespace RgenLib.Extensions {
 
         private static T ParseAttributeProperty<T>(string value)
         {
-            return (T)ParseAttributeProperty(typeof (T), value);
+            try
+            {
+                return (T)ParseAttributeProperty(typeof (T), value);
+            }
+            catch (Exception e)
+            {
+                Debug.DebugHere(e);
+                throw;
+            }
         }
 
         static public TResult GetAttributeProperty<TAttr, TResult>(this  CodeElement2 ce, Expression<Func<TAttr, TResult>> memberExpr)
