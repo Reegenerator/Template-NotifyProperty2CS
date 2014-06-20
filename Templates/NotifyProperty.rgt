@@ -33,9 +33,9 @@
 	<%@ Parameter Name="attributes" Type="String"  %>
 	<%@ Parameter Name="interfaceImpl" Type="String"  %>
 	
-    private <%= propType %> _<%= propName %>; 
-	<%= existingComment %>
-	<%= attributes 	%>
+    private <%= propType %> _<%= propName %>; <%=
+	 existingComment %><%=
+	 attributes 	%>
 	public <%= propType %> <%= propName %> {
         get {
             return _<%= propName %>;

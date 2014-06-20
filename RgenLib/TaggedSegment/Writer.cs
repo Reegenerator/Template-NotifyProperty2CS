@@ -253,7 +253,7 @@ namespace RgenLib.TaggedSegment {
             /// </summary>
             /// <returns></returns>
             /// <remarks></remarks>
-            public bool InsertOrReplace() {
+            public bool InsertOrReplace(bool alwaysInsert=false) {
                 var generatedSegments = GeneratedSegment.Find(this);
                 var needInsert = false;
                 if (generatedSegments.Length == 0) {
@@ -264,7 +264,7 @@ namespace RgenLib.TaggedSegment {
                     //if any is outdated, delete, and reinsert
                     foreach (var t in
                         from t1 in generatedSegments
-                        where t1.IsOutdated(OptionTag)
+                        where alwaysInsert || t1.IsOutdated(OptionTag)
                         select t1) {
 
                         t.Range.DeleteText();

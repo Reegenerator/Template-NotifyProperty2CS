@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ namespace Test {
             }
             set {
 
-                #region SetPropertyAndNotify Name Reegenerator:{Template:"NotifyProperty",Date:"2014-06-19T17:25:08.5048666+08:00"}
+                #region SetPropertyAndNotify Name Reegenerator:{Template:"NotifyProperty",Date:"2014-06-20T11:51:00.6427125+08:00"}
                 this.SetPropertyAndNotify(ref _Name, value, "Name");
                 #endregion
             }
@@ -50,7 +51,7 @@ namespace Test {
             }
             set {
 
-                #region SetPropertyAndNotify Age Reegenerator:{Template:"NotifyProperty",Date:"2014-06-19T17:25:08.5198677+08:00"}
+                #region SetPropertyAndNotify Age Reegenerator:{Template:"NotifyProperty",Date:"2014-06-20T11:51:00.7117216+08:00"}
                 this.SetPropertyAndNotify(ref _Age, value, "Age");
                 this.NotifyChanged("Name");
                 #endregion
@@ -60,5 +61,16 @@ namespace Test {
         #endregion
 
 
+        /// <summary>
+        /// Test
+        /// </summary>
+        [DefaultValue("")]
+        public System.String Address { get; set; }
+
+
+        [Attributes.NotifyPropertyOption(IsIgnored=true)]
+        public string Notes { get; set; }
+
+        public int Value { get; set; }
     }
 }

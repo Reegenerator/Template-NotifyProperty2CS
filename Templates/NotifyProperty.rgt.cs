@@ -28,8 +28,12 @@ namespace Templates {
         private ManagerType _manager;
         private static readonly string INotifyPropertyChangedName = typeof(INotifyPropertyChanged).FullName;
         private static readonly Type _optionAttributeType = typeof(NotifyPropertyOptionAttribute);
-
-
+        
+        /// <summary>
+        /// To be overriden by Snippet
+        /// </summary>
+        protected virtual bool _alwaysInsert{get { return false; }}
+        protected virtual bool _autoPropertyExpansionIsTagged { get { return true; } }
         public override Type OptionAttributeType {
             get { return _optionAttributeType; }
         }
@@ -105,7 +109,7 @@ namespace Templates {
                 //generate text if outdated
                 var code = new NotifyPropertyLibrary(prj.DefaultNamespace).RenderToString();
                 writer.Content = code;
-                writer.InsertOrReplace();
+                writer.InsertOrReplace(_alwaysInsert);
                 classItem.Save("");
             }
 
@@ -234,17 +238,20 @@ namespace Templates {
             var propAttrs = prop.GetText(vsCMPart.vsCMPartAttributesWithDelimiter);
             //Interface implementation 
             var interfaceImpl = prop.GetInterfaceImplementation();
-          
 
 
-            var writer = new ManagerType.Writer(parentWriter) {
+            var code = General.GetTemplateOutput(output =>
+                GenProperty(output, prop.Name, prop.Type.SafeFullName(), comment, propAttrs, interfaceImpl)
+                );
+            var writer = new ManagerType.Writer(parentWriter)
+            {
                 SegmentType = SegmentTypes.Region,
                 TagNote = string.Format("{0} expanded by", prop.Name),
                 //OptionTag,
-                Content = General.GetTemplateOutput(output =>
-                               GenProperty(output, prop.Name, prop.Type.SafeFullName(), comment, propAttrs, interfaceImpl)
-                          )
+                Content = code
             };
+
+            var text = _autoPropertyExpansionIsTagged ? writer.GenText() : code; 
             //only do this once, since once it is expanded it will no longer be detected as auto property
       
 
@@ -253,7 +260,7 @@ namespace Templates {
                                        vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines);
             prop.GetCommentStartPoint()
                 .CreateEditPoint()
-                .ReplaceText(prop.EndPoint, writer.GenText(), options);
+                .ReplaceText(prop.EndPoint, text, options);
 
         }
 
@@ -361,9 +368,8 @@ namespace Templates {
                 insertPoint.LineDown(1);
                 insertPoint.StartOfLine();
             }
-
             memberWriter.InsertStart = insertPoint;
-            memberWriter.InsertOrReplace();
+            memberWriter.InsertOrReplace(_alwaysInsert);
 
         }
         private void GenInMembers(ManagerType.Writer tsWriter) {
