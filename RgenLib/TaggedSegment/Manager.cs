@@ -46,7 +46,7 @@ namespace RgenLib.TaggedSegment {
     
 
         public void Remove(Writer info) {
-            var taggedRanges = GeneratedSegment.FindSegments(info);
+            var taggedRanges = GeneratedSegment.FindSegments(info.TargetRange);
             foreach (var t in taggedRanges) {
                 t.Range.DeleteText();
             }

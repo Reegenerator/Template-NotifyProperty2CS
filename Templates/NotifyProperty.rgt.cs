@@ -28,11 +28,11 @@ namespace Templates {
         private ManagerType _manager;
         private static readonly string INotifyPropertyChangedName = typeof(INotifyPropertyChanged).FullName;
         private static readonly Type _optionAttributeType = typeof(NotifyPropertyOptionAttribute);
-        
+
         /// <summary>
         /// To be overriden by Snippet
         /// </summary>
-        protected virtual bool _alwaysInsert{get { return false; }}
+        protected virtual bool _alwaysInsert { get { return false; } }
         protected virtual bool _autoPropertyExpansionIsTagged { get { return true; } }
         public override Type OptionAttributeType {
             get { return _optionAttributeType; }
@@ -42,9 +42,8 @@ namespace Templates {
             get { return this.ProjectItem.Project.DefaultNamespace.DotJoin(NotifyPropertyLibrary.INotifierName); }
         }
 
-        public NotifyProperty()
-        {
-            
+        public NotifyProperty() {
+
             //var tagName = (new NotifyPropertyChanged_GenAttribute()).TagName;
             _manager = new ManagerType(TagFormat.Json);
         }
@@ -97,12 +96,10 @@ namespace Templates {
                 classItem.Open(Constants.vsViewKindCode);
             }
             var textDoc = classItem.Document.ToTextDocument();
-
             var writer = new ManagerType.Writer(_manager) {
-                SearchStart = textDoc.StartPoint,
-                InsertStart = textDoc.StartPoint,
-                SearchEnd = textDoc.EndPoint,
-                SegmentType = SegmentTypes.Region
+                TargetRange = new TaggedRange() { StartPoint = textDoc.StartPoint, EndPoint = textDoc.EndPoint, SegmentType = SegmentTypes.Region },
+                InsertStart = textDoc.StartPoint
+
             };
 
             if (ManagerType.GeneratedSegment.IsAnyOutdated(writer)) {
@@ -124,7 +121,7 @@ namespace Templates {
         /// </summary>
         /// <remarks></remarks>
         private void RenderWithinTarget() {
-          
+
             var undoCtx = Dte.UndoContext;
             undoCtx.Open(OptionAttributeType.Name, false);
             try {
@@ -221,7 +218,7 @@ namespace Templates {
         }
 
 
-        
+
 
         /// <summary>
         /// Expand auto property into a normal property
@@ -243,17 +240,16 @@ namespace Templates {
             var code = General.GetTemplateOutput(output =>
                 GenProperty(output, prop.Name, prop.Type.SafeFullName(), comment, propAttrs, interfaceImpl)
                 );
-            var writer = new ManagerType.Writer(parentWriter)
-            {
-                SegmentType = SegmentTypes.Region,
+            var writer = new ManagerType.Writer(parentWriter) {
+                TargetRange = new TaggedRange() { SegmentType = SegmentTypes.Region },
                 TagNote = string.Format("{0} expanded by", prop.Name),
                 //OptionTag,
                 Content = code
             };
 
-            var text = _autoPropertyExpansionIsTagged ? writer.GenText() : code; 
+            var text = _autoPropertyExpansionIsTagged ? writer.GenText() : code;
             //only do this once, since once it is expanded it will no longer be detected as auto property
-      
+
 
             //Replace all code starting from comment to endPoint of the property
             const int options = (int)(vsEPReplaceTextOptions.vsEPReplaceTextAutoformat |
@@ -282,7 +278,7 @@ namespace Templates {
                 return null;
             }
 
-            var extras = GetValidatedExtraNotifications( parentWriter.Clone(optionTag));
+            var extras = GetValidatedExtraNotifications(parentWriter.Clone(optionTag));
             return string.Format(NotifyChangedFormat, string.Join(",", extras.Select((x) => x.Quote())));
 
 
@@ -322,18 +318,22 @@ namespace Templates {
             //!Parent can be either CodeFunction(only for ExtraNotifications) or CodeProperty
             string code = null;
             var note = "";
-            switch (optionTag.OptionAttribute.GenerationType) {
-                case NotifyPropertyOptionAttribute.GenerationTypes.NotifyOnly:
-                    //Only notification
-                    note = string.Format("Notify {0}", memberName);
-                    code = string.Format(NotifyChangedFormat, memberName);
-                    break;
-                default:
-                    note = string.Format("SetPropertyAndNotify {0}", memberName);
-                    code = string.Format("this.SetPropertyAndNotify(ref _{0}, value, \"{0}\");", memberName);
-                    break;
-            }
 
+            if (optionTag.CodeElement is CodeProperty) {
+                switch (optionTag.OptionAttribute.GenerationType) {
+                    case NotifyPropertyOptionAttribute.GenerationTypes.NotifyOnly:
+
+                        //Notify Member name
+                        note = string.Format("Notify {0}", memberName);
+                        code = string.Format(NotifyChangedFormat, memberName);
+                        break;
+                    default:
+                        //Set and property Member name
+                        note = string.Format("SetPropertyAndNotify {0}", memberName);
+                        code = string.Format("this.SetPropertyAndNotify(ref _{0}, value, \"{0}\");", memberName);
+                        break;
+                }
+            }
 
 
             //Extra notifications
@@ -343,22 +343,24 @@ namespace Templates {
             //Code Element, could be property setter or a method
             var prop = (optionTag.CodeElement as CodeProperty2);
             var codeElement = (CodeFunction2)((prop != null) ? prop.Setter : (CodeFunction2)optionTag.CodeElement);
-            var memberWriter = new ManagerType.Writer(parentWriter)
-            {
-                TagNote= note,
-                OptionTag = optionTag, 
-                SearchStart = codeElement.StartPoint, 
-                SearchEnd = codeElement.EndPoint, 
-                Content = code, 
-                SegmentType = SegmentTypes.Region
+            var memberWriter = new ManagerType.Writer(parentWriter) {
+                TagNote = note,
+                OptionTag = optionTag,
+                TargetRange = new TaggedRange() { StartPoint = codeElement.StartPoint, EndPoint = codeElement.EndPoint, SegmentType = SegmentTypes.Region },
+                Content = code,
             };
 
             //Find insertion point
             EditPoint insertPoint = null;
-            var insertTag = ManagerType.GeneratedSegment.FindInsertionPoint(memberWriter);
+            EditPoint afterClosingBracePoint = null;
+           
+            var insertTag = ManagerType.GeneratedSegment.FindInsertionPoint(memberWriter.TargetRange);
             if (insertTag == null) {
                 //!No insertion point tag specified, by default insert as last line of setter
-                insertPoint = codeElement.GetPositionBeforeClosingBrace();
+
+                insertPoint = codeElement.GetClosingBracePosition();
+                afterClosingBracePoint = insertPoint.CreateEditPoint();
+                afterClosingBracePoint.CharRight();
                 //always insert new line in case the everything in one line
 
             }
@@ -369,9 +371,8 @@ namespace Templates {
                 insertPoint.StartOfLine();
             }
 
-            Debug.DebugHere();
             memberWriter.InsertStart = insertPoint;
-            memberWriter.InsertOrReplace(_alwaysInsert);
+            memberWriter.InsertOrReplace(_alwaysInsert, afterClosingBracePoint);
 
         }
         private void GenInMembers(ManagerType.Writer tsWriter) {
@@ -393,15 +394,13 @@ namespace Templates {
             var dpFields = tsWriter.Class.GetDependencyProperties();
 
 
-            Func<ManagerType.OptionTag, bool> notDpField = x =>
-            {
+            Func<ManagerType.OptionTag, bool> notDpField = x => {
                 bool res = !(dpFields.Any((dp) => dp.Name == x.CodeElement.Name + "Property"));
                 return res;
             };
-            Func<ManagerType.OptionTag, bool> notIgnored = x =>
-            {
+            Func<ManagerType.OptionTag, bool> notIgnored = x => {
                 var attr = x.OptionAttribute;
-                return attr ==null || !attr.IsIgnored;
+                return attr == null || !attr.IsIgnored;
             };
 
 
@@ -439,14 +438,13 @@ namespace Templates {
             if (ancestorImplementingINotifier != null) {
                 code = string.Format("'{0} already implemented by {1}", NotifyPropertyLibrary.INotifierName, ancestorImplementingINotifier.FullName);
             }
-            else if (ancestorImplementingINPC != null)
-            {
+            else if (ancestorImplementingINPC != null) {
                 code = string.Format("'{0} already implemented by {1}{2}", ancestorImplementingINPC.FullName, INotifyPropertyChangedName, Environment.NewLine);
             }
             else {
                 code = General.GetTemplateOutput((output) => GenFunctions(output, tsWriter.Class.FullName, true));
             }
-            
+
             var insertPoint = tsWriter.Class.GetStartPoint(vsCMPart.vsCMPartBody).CreateEditPoint();
             insertPoint.StartOfLine();
             //var body = writer.Class.GetText(vsCMPart.vsCMPartBody);
@@ -456,13 +454,11 @@ namespace Templates {
             //copy info, instead of using the passed parameter, prevent unintentionally using irrelevant property set 
             // by other code
             var newInfo = new ManagerType.Writer(tsWriter) {
-                SearchStart = tsWriter.Class.StartPoint,
-                SearchEnd = tsWriter.Class.EndPoint,
+                TargetRange = new TaggedRange() { StartPoint = tsWriter.Class.StartPoint, EndPoint = tsWriter.Class.EndPoint, SegmentType = SegmentTypes.Region },
                 InsertStart = insertPoint,
                 Content = code,
-                SegmentType = SegmentTypes.Region,
                 TagNote = "INotifier Functions",
-                OptionTag = { Category = "INotifierFunctions" }
+                OptionTag = new ManagerType.OptionTag { Category = "INotifierFunctions" }
             };
 
             var isUpdated = newInfo.InsertOrReplace();
@@ -496,8 +492,7 @@ namespace Templates {
             }
         }
 
-        public override RenderResults Render()
-        {
+        public override RenderResults Render() {
             Debug.SetTraceListener(OutputPaneTraceListener);
             this.RenderWithinTarget();
             return null; // new RenderResults();

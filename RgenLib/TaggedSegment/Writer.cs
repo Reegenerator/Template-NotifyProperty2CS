@@ -21,7 +21,7 @@ namespace RgenLib.TaggedSegment {
         /// </summary>
         /// <remarks></remarks>
         public class Writer {
-            private  Manager<TRenderer, TOptionAttr> _manager;
+            private Manager<TRenderer, TOptionAttr> _manager;
 
             public Manager<TRenderer, TOptionAttr> Manager { get { return _manager; } }
             public OptionTag OptionTag { get; set; }
@@ -30,18 +30,18 @@ namespace RgenLib.TaggedSegment {
                 _manager = manager;
                 OptionTag = new OptionTag();
             }
-            public Writer(Manager<TRenderer, TOptionAttr> manager, CodeClass2 cc): this(manager) {
+            public Writer(Manager<TRenderer, TOptionAttr> manager, CodeClass2 cc)
+                : this(manager) {
                 Class = cc;
 
             }
             public Writer(Manager<TRenderer, TOptionAttr> manager, CodeClass2 cc, CodeClass2 triggeringBase)
-                : this(manager,cc) {
-                    TriggeringBaseClass = triggeringBase;
+                : this(manager, cc) {
+                TriggeringBaseClass = triggeringBase;
 
             }
 
-            public Writer(Writer sourceWriter)
-            {
+            public Writer(Writer sourceWriter) {
                 this.CopyPropertiesFrom(sourceWriter);
             }
 
@@ -50,8 +50,7 @@ namespace RgenLib.TaggedSegment {
             /// </summary>
             /// <param name="optionTag">New Option</param>
             /// <returns></returns>
-            public Writer Clone(OptionTag optionTag)
-            {
+            public Writer Clone(OptionTag optionTag) {
                 var clone = Clone();
                 clone.OptionTag = optionTag;
                 return clone;
@@ -61,34 +60,38 @@ namespace RgenLib.TaggedSegment {
             /// </summary>
             /// source of properties to be copied
             /// <remarks></remarks>
-            public Writer Clone()
-            {
+            public Writer Clone() {
                 var newWriter = new Writer(this.Manager);
                 newWriter.CopyPropertiesFrom(this);
                 return newWriter;
             }
 
-            private void CopyPropertiesFrom(Writer source)
-            {
+            private void CopyPropertiesFrom(Writer source) {
                 _manager = source.Manager;
                 Class = source.Class;
                 TriggeringBaseClass = source.TriggeringBaseClass;
-                    //Clone instead of reusing parent's attribute, because they may have different property values
+                //Clone instead of reusing parent's attribute, because they may have different property values
 
                 OptionTag = (OptionTag)source.OptionTag.MemberwiseClone();
-                Category = source.Category;
+              
             }
 
             public TagFormat TagFormat { get { return Manager.TagFormat; } }
-            public string Category { get; set; }
             public CodeClass2 TriggeringBaseClass { get; set; }
             public CodeClass2 Class { get; set; }
             //public TRenderer Renderer { get; set; }
-            public TextPoint SearchStart { get; set; }
-            public TextPoint SearchEnd { get; set; }
+
+            public TaggedRange TargetRange {
+                get { return _targetRange; }
+                set {
+                    _targetRange = value;
+                    _targetRange.TagFormat = Manager.TagFormat;
+                }
+            }
+
+
             public TextPoint InsertStart { get; set; }
             public TextPoint InsertedEnd { get; set; }
-            public SegmentTypes SegmentType { get; set; }
             public string Content { get; set; }
             public string ProcessedContent { get; set; }
             /// <summary>
@@ -107,6 +110,7 @@ namespace RgenLib.TaggedSegment {
             public bool HasError { get; set; }
 
             private StringBuilder _Status;
+            private TaggedRange _targetRange;
 
             public StringBuilder Status {
                 get { return _Status ?? (_Status = new StringBuilder()); }
@@ -128,12 +132,12 @@ namespace RgenLib.TaggedSegment {
             }
 
             public string GetSearchText() {
-                return SearchStart.CreateEditPoint().GetText(SearchEnd);
+                return TargetRange.GetText();
             }
 
-            public TextPoint InsertAndFormat() {
+            public TextPoint InsertAndFormat(TextPoint formatEndPoint = null) {
                 var text = GenText();
-                InsertedEnd = InsertStart.InsertAndFormat(text);
+                InsertedEnd = InsertStart.InsertAndFormat(text, formatEndPoint);
                 return InsertedEnd;
             }
 
@@ -143,7 +147,7 @@ namespace RgenLib.TaggedSegment {
                 return Manager.TagFormat == TagFormat.Json ? GenJsonTag() : GenXmlTag().ToString();
             }
             public string GenJsonTag() {
-               
+
                 var serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, ContractResolver = Tag.OrderedPropertyResolver };
                 var stringWriter = new StringWriter();
                 var writer = new JsonTextWriter(stringWriter) { QuoteName = false };
@@ -209,24 +213,23 @@ namespace RgenLib.TaggedSegment {
 
 
             public string GenText() {
-                try
-                {
+                try {
                     OptionTag.GenerateDate = DateTime.Now;
                     switch (Manager.TagFormat) {
                         case TagFormat.Xml:
-                            switch (SegmentType) {
+                            switch (TargetRange.SegmentType) {
                                 case SegmentTypes.Region:
                                     return GenTaggedRegionText(CreateXmlTaggedRegionName());
-                                case SegmentTypes.Statements:
+                                case SegmentTypes.CommentPair:
                                     return CreateXmlTaggedCommentText();
                                 default:
                                     throw new Exception("Unknown SegmentType");
                             }
                         case TagFormat.Json:
-                            switch (SegmentType) {
+                            switch (TargetRange.SegmentType) {
                                 case SegmentTypes.Region:
                                     return GenTaggedRegionText(GenJsonTag());
-                                case SegmentTypes.Statements:
+                                case SegmentTypes.CommentPair:
                                     return Constants.CodeCommentPrefix + GenJsonTag();
                                 default:
                                     throw new Exception("Unknown SegmentType");
@@ -235,8 +238,7 @@ namespace RgenLib.TaggedSegment {
                             throw new Exception("Unknown TagFormat");
                     }
                 }
-                catch (Exception e)
-                {
+                catch (Exception e) {
                     Debug.DebugHere(e);
                     throw;
                 }
@@ -253,8 +255,8 @@ namespace RgenLib.TaggedSegment {
             /// </summary>
             /// <returns></returns>
             /// <remarks></remarks>
-            public bool InsertOrReplace(bool alwaysInsert=false) {
-                var generatedSegments = GeneratedSegment.Find(this);
+            public bool InsertOrReplace(bool alwaysInsert = false, TextPoint formatEndPoint = null) {
+                var generatedSegments = GeneratedSegment.Find(TargetRange, OptionTag.Category);
                 var needInsert = false;
                 if (generatedSegments.Length == 0) {
                     //if none found, then insert
@@ -275,7 +277,7 @@ namespace RgenLib.TaggedSegment {
                     return false;
                 }
 
-                InsertAndFormat();
+                InsertAndFormat(formatEndPoint);
                 //!Open file if requested
                 if (OpenFileOnGenerated && Class != null) {
                     if (!Class.ProjectItem.IsOpen) {
@@ -285,7 +287,7 @@ namespace RgenLib.TaggedSegment {
                 return true;
             }
 
-            
+
         }
 
     }

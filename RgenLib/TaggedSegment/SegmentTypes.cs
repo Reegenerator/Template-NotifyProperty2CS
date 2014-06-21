@@ -5,8 +5,12 @@ namespace RgenLib.TaggedSegment
 	{
 		Region,
         /// <summary>
-        /// Specially constructed comment only used for VB code, which does not allow region within method body
+        /// Specially constructed pair of comment only used for VB code, which does not allow region within method body
         /// </summary>
-		Statements
+		CommentPair,
+        /// <summary>
+        /// Single line comment , used for InsertionPoint
+        /// </summary>
+        SingleComment
 	}
 }

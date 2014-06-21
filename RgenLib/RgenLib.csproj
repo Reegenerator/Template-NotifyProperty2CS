@@ -126,6 +126,7 @@
     <Compile Include="TaggedSegment\Json\OrderedContractResolver.cs" />
     <Compile Include="TaggedSegment\RegenModes.cs" />
     <Compile Include="TaggedSegment\TagFormat.cs" />
+    <Compile Include="TaggedSegment\TaggedRange.cs" />
     <Compile Include="TaggedSegment\TagWrapper.cs" />
     <Compile Include="TaggedSegment\Json\VersionConverter.cs" />
     <Compile Include="TaggedSegment\OptionTag.cs" />

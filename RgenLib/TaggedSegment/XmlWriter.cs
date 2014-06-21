@@ -31,7 +31,7 @@ namespace RgenLib.TaggedSegment
 		public override void WriteStartElement(string prefix, string localname, string ns)
 		{
 			//insert inline comment character before the start tag
-			if (SegmentType == SegmentTypes.Statements)
+			if (SegmentType == SegmentTypes.CommentPair)
 			{
 				WriteString(CodeCommentPrefix);
 			}
@@ -41,7 +41,7 @@ namespace RgenLib.TaggedSegment
 		public override void WriteFullEndElement()
 		{
 			//insert inline comment character before the end tag
-			if (SegmentType == SegmentTypes.Statements)
+			if (SegmentType == SegmentTypes.CommentPair)
 			{
 				WriteString(CodeCommentPrefix);
 			}
@@ -51,7 +51,7 @@ namespace RgenLib.TaggedSegment
 		}
 		public static string ToCommentedString(XElement x)
 		{
-			return InternalToString(x, SegmentTypes.Statements);
+			return InternalToString(x, SegmentTypes.CommentPair);
 		}
 
 		/// <summary>

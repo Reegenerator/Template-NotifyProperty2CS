@@ -454,7 +454,7 @@ namespace RgenLib.Extensions {
             return sp;
         }
 
-        public static EditPoint GetPositionBeforeClosingBrace(this CodeFunction cf) {
+        public static EditPoint GetClosingBracePosition(this CodeFunction cf) {
             const string closingBrace = "}";
             var sp = cf.EndPoint.CreateEditPoint();
 
@@ -462,8 +462,7 @@ namespace RgenLib.Extensions {
             do {
                 sp.CharLeft();
             } while (sp.GetText(1) != closingBrace);
-            //Go left one more char
-            sp.CharLeft();
+          
             return sp;
         }
 

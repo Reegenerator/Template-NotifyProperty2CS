@@ -22,55 +22,52 @@ namespace Test {
 
         #endregion
 
-        #region Name expanded by Reegenerator:{Template:"NotifyProperty",Date:"2014-06-19T17:25:08.4428653+08:00"}
-        private System.String _Name;
 
-
-        public System.String Name {
-            get {
-                return _Name;
-            }
-            set {
-
-                #region SetPropertyAndNotify Name Reegenerator:{Template:"NotifyProperty",Date:"2014-06-20T11:51:00.6427125+08:00"}
-                this.SetPropertyAndNotify(ref _Name, value, "Name");
-                #endregion
-            }
-        }
-
-        #endregion
-
-
-        #region Age expanded by Reegenerator:{Template:"NotifyProperty",Date:"2014-06-19T17:25:08.4808652+08:00"}
-        private System.Int32 _Age;
-
-        [NotifyPropertyOption(ExtraNotifications = "Name")]
-        public System.Int32 Age {
-            get {
-                return _Age;
-            }
-            set {
-
-                #region SetPropertyAndNotify Age Reegenerator:{Template:"NotifyProperty",Date:"2014-06-20T11:51:00.7117216+08:00"}
-                this.SetPropertyAndNotify(ref _Age, value, "Age");
-                this.NotifyChanged("Name");
-                #endregion
-            }
-        }
-
-        #endregion
-
-
-        /// <summary>
+        private System.String _Address;         /// <summary>
         /// Test
         /// </summary>
         [DefaultValue("")]
-        public System.String Address { get; set; }
+        public System.String Address {
+            get {
+                return _Address;
+            }
+            set {
+
+                #region SetPropertyAndNotify Address Reegenerator:{Template:"NotifyProperty",Date:"2014-06-21T13:36:58.9486177+08:00"}
+                this.SetPropertyAndNotify(ref _Address, value, "Address");
+                #endregion
+            }
+        }
+
 
 
         [NotifyPropertyOption(IsIgnored=true)]
         public string Notes { get; set; }
 
-        public int Value { get; set; }
+        private System.Int32 _Value;
+        public System.Int32 Value {
+            get {
+                return _Value;
+            }
+            set {
+
+                #region SetPropertyAndNotify Value Reegenerator:{Template:"NotifyProperty",Date:"2014-06-21T13:36:58.9696184+08:00"}
+                this.SetPropertyAndNotify(ref _Value, value, "Value");
+                #endregion
+            }
+        }
+
+
+        [NotifyPropertyOption(ExtraNotifications="Notes")]
+        public void Test() {
+            //Reegenerator:{ Template:"NotifyProperty",Type:"InsertPoint"}
+            #region  Reegenerator:{Template:"NotifyProperty",Date:"2014-06-21T13:36:58.8896142+08:00"}
+            this.NotifyChanged("Notes");
+            #endregion
+       
+            Value = 1;
+
+        
+        }
     }
 }
