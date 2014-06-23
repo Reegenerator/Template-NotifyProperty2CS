@@ -51,7 +51,6 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="NotifyPropertyChanged_Gen_Extensions.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Person.Designer.cs">
       <DependentUpon>Person.cs</DependentUpon>

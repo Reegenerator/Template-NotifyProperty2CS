@@ -10,15 +10,12 @@
 <%@ Method Name="GenFunctions" DefineOutputParameter="True"   %>
 
 <%@ Parameter Name="className" Type="String" %>
-<%@ Parameter Name="IncludeNPC" Type="Boolean" %>
-	<% if (IncludeNPC) { %> 
-		public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-	<%} %>
-
+<%@ Parameter Name="IncludeNPC" Type="Boolean" %><% 
+	if (IncludeNPC) { %> 
+	public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;<%
+	} %>
     void <%= INotifierFullName %>.Notify(string propertyName) {  
-		if (PropertyChanged != null) {
-            PropertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-        }
+		if (PropertyChanged != null) PropertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
     }
   
 	
@@ -32,8 +29,7 @@
 	<%@ Parameter Name="existingComment" Type="String" Info="Multiline comment needs a newline at the end of the text(but not before)" %>
 	<%@ Parameter Name="attributes" Type="String"  %>
 	<%@ Parameter Name="interfaceImpl" Type="String"  %>
-	
-    private <%= propType %> _<%= propName %>; <%=
+	private <%= propType %> _<%= propName %>; <%=
 	 existingComment %><%=
 	 attributes 	%>
 	public <%= propType %> <%= propName %> {
