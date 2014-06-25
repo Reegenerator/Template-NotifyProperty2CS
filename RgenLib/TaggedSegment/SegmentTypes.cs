@@ -11,6 +11,6 @@ namespace RgenLib.TaggedSegment
         /// <summary>
         /// Single line comment , used for InsertionPoint
         /// </summary>
-        SingleComment
+        SingleLineComment
 	}
 }

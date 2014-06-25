@@ -78,19 +78,16 @@ namespace RgenLib.TaggedSegment {
                     )
                     \{4}(\r\n)?";
 
-                const string xmlCommentPatternFormat = @"
-                    (
-                    {3}(?<tag><{0}\s*{1}='{2}'\s*[^<>]*/>)
-                    )
-                    |           
-                    (
-                        {3}(?<tag><{0}\s*{1}='{2}'\s*
-                            [^<>]*#Match everything but tag symbols
-                            (?<!/)>)\s*#Match only > but not />
-                        (?<content>.*?)(?<!</{0}>)
-                        {3}(?<tagend></{0}>)\s*
-                    )";
-
+                const string xmlCommentPairPatternFormat = @"
+                    {3}(?<xml><{0}\s*{1}='{2}'\s*
+                        [^<>]*#Match everything but tag symbols
+                        (?<!/)>)\s*#Match only > but not />
+                    (?<content>.*?)(?<!</{0}>)
+                    {3}(?<tagend></{0}>)\s*
+                    ";
+                const string xmlSingleCommentPatternFormat = @"
+                    {3}(?<xml><{0}\s*{1}='{2}'\s*[^<>]*/>)
+                    ";
                 //quotes are doubled to escape them inside literal string
                 //curly braces are doubled to escape them for string.format
                 const string jsonRegionPatternFormat = @"
@@ -118,14 +115,14 @@ namespace RgenLib.TaggedSegment {
                 var tagName = TagPrototype.Name.LocalName;
 
                 var templateName = typeof(TRenderer).Name;
-                //xml, statement
-
                 _regexDict.Add(TagFormat.Xml, new Dictionary<SegmentTypes, Regex>());
-                var xmlCommentPattern = string.Format(xmlCommentPatternFormat, tagName, rendererAttr.Name, rendererAttr.Value, Constants.CodeCommentPrefix);
-                var xmlCommentRegex = new Regex(xmlCommentPattern, Constants.DefaultRegexOption);
-                _regexDict[TagFormat.Xml].Add(SegmentTypes.CommentPair, xmlCommentRegex);
 
-                _regexDict[TagFormat.Xml].Add(SegmentTypes.SingleComment, xmlCommentRegex);
+                //xml, comment pair 
+                var xmlCommentPairPattern = string.Format(xmlCommentPairPatternFormat, tagName, rendererAttr.Name, rendererAttr.Value, Constants.CodeCommentPrefix);
+                _regexDict[TagFormat.Xml].Add(SegmentTypes.CommentPair,  new Regex(xmlCommentPairPattern, Constants.DefaultRegexOption));
+                //xml, single line comment
+                var xmlSingleCommentPattern = string.Format(xmlSingleCommentPatternFormat, tagName, rendererAttr.Name, rendererAttr.Value, Constants.CodeCommentPrefix);
+                _regexDict[TagFormat.Xml].Add(SegmentTypes.SingleLineComment, new Regex(xmlSingleCommentPattern, Constants.DefaultRegexOption));
 
                 //xml , region
                 var xmlRegPattern = string.Format(xmlRegionPatternFormat, tagName, rendererAttr.Name, rendererAttr.Value, RegionBeginKeyword, RegionEndKeyword);
@@ -146,7 +143,7 @@ namespace RgenLib.TaggedSegment {
                                                     Constants.JsonTagPrefix,
                                                     TemplateNamePropertyName,
                                                     templateName);
-                _regexDict[TagFormat.Json].Add(SegmentTypes.SingleComment, new Regex(jsonSingleCommentPattern, Constants.DefaultRegexOption));
+                _regexDict[TagFormat.Json].Add(SegmentTypes.SingleLineComment, new Regex(jsonSingleCommentPattern, Constants.DefaultRegexOption));
 
 
             }
@@ -169,13 +166,15 @@ namespace RgenLib.TaggedSegment {
                 var xmlContent = "";
                 switch (segType) {
                     case SegmentTypes.Region:
+                    case SegmentTypes.SingleLineComment:
+
                         xmlContent = match.Result("${xml}");
                         break;
                     case SegmentTypes.CommentPair:
                         xmlContent = match.Result("${tag}${content}${tagend}");
                         break;
                 }
-
+                if (xmlContent == "") Debug.DebugHere();
                 return XDocument.Parse(xmlContent).Root;
             }
             /// <summary>
@@ -240,7 +239,7 @@ namespace RgenLib.TaggedSegment {
             static public GeneratedSegment FindInsertionPoint(TaggedRange range) {
                 //insertion points are always single comment, override the writer info
                 var copy = range.Clone();
-                copy.SegmentType = SegmentTypes.SingleComment;
+                copy.SegmentType = SegmentTypes.SingleLineComment;
                 return Find(copy, TagTypes.InsertPoint).FirstOrDefault();
             }
             static public GeneratedSegment[] Find(TaggedRange range, string category) {

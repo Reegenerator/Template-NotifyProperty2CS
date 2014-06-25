@@ -19,12 +19,10 @@ namespace RgenLib {
 
             private object GetParentValue(object rootObj)
             {
-                if (rootObj == null) Debug.DebugHere();
                 var obj = ParentInfo == null ? rootObj : ParentInfo.GetValue(rootObj);
                 return obj;
             }
             public object GetValue(object rootObj) {
-                if (rootObj == null) Debug.DebugHere();
                 var parent = GetParentValue(rootObj);
                 if (parent == null) return null;
                 return Info.GetValue(parent, null);

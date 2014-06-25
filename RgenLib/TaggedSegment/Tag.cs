@@ -115,6 +115,7 @@ namespace RgenLib.TaggedSegment {
 
             [JsonProperty(PropertyName = TagTypePropertyName)]
             [JsonConverter(typeof(StringEnumConverter))]
+            [XmlAttribute(TagTypePropertyName)]
             public TagTypes TagType { get; set; }
 
             [JsonConverter(typeof(VersionConverter))]

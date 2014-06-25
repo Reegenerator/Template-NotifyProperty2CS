@@ -160,19 +160,12 @@ namespace RgenLib.TaggedSegment {
             
                 var xml = new XElement(Tag.TagPrototype);
                 var trigger = OptionTag.Trigger;
-                if (trigger != null) {
-                    xml.SetAttributeValue("Trigger", trigger.Type.ToString());
-                    xml.SetAttributeValue("TriggerInfo", trigger.TriggeringBaseClass);
-                }
-            
-
                 xml.SetAttributeValue(Tag.GenerateDatePropertyName, DateTime.Now.ToString(Constants.TagDateFormat, Constants.TagDateCulture));
-                object debugKey;
                 try
                 {
                     foreach (var keyValuePair in XmlAttributeAttribute.GetXmlProperties(typeof(Tag)))
                     {
-                        debugKey = keyValuePair;
+                        
                         var propValue = keyValuePair.Value.GetValue(OptionTag);
                         //only write the xml attribute if it has a value, to keep the tag concise
                         if (propValue != null) {
