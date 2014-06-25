@@ -4,10 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
-using EnvDTE;
 using Newtonsoft.Json;
 using RgenLib.Extensions;
-using RgenLib.TaggedSegment.Json;
+using TextPoint = EnvDTE.TextPoint;
 
 namespace RgenLib.TaggedSegment {
     public partial class Manager<TRenderer, TOptionAttr>
@@ -200,13 +199,12 @@ namespace RgenLib.TaggedSegment {
             /// Ex: SomeArg=("Test") would result in the Argument.Value ("Test") (with parentheses and quote)
             /// </remarks>
             private static object ParseXmlAttributeValue(PropertyInfo propInfo, string value) {
-                //Debug.DebugHere();
 
                 object parsed;
                 var propType = propInfo.PropertyType;
                 if (propType.IsEnum) {
-                    //if enum, remove the Enum qualifier (e.g TagTypes.InsertPoint => InserPoint)
-                    parsed = Enum.Parse(typeof(RegenModes), value);
+                    //if enum, remove the Enum qualifier (e.g TagTypes.InsertPoint becomes InserPoint)
+                    parsed = value.StripQualifier();
                 }
                 else if (propType == typeof(DateTime) || propType == typeof(DateTime?)) {
                     parsed = DateTime.ParseExact(value, Constants.TagDateFormat, Constants.TagDateCulture);
@@ -236,7 +234,7 @@ namespace RgenLib.TaggedSegment {
                         if (name == XmlRendererAttributeName) {
                             continue;
                         }
-
+                    
                         var prop = xmlProps[name];
                         prop.SetValue(tag, ParseXmlAttributeValue(prop, attr.Value));
 
@@ -277,7 +275,7 @@ namespace RgenLib.TaggedSegment {
                 return FindSegments(range).Where(x => x.TagType == tagType);
             }
 
-            static public TextRange ConvertRegexMatchToTextRange(Match m, EnvDTE.TextPoint startPoint)
+            static public TextRange ConvertRegexMatchToTextRange(Match m, TextPoint startPoint)
             {
                 var matchStart = startPoint.CreateEditPoint();
                 matchStart.CharRightExact(m.Index);

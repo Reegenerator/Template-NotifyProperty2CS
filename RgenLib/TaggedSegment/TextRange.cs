@@ -38,6 +38,7 @@ namespace RgenLib.TaggedSegment
 		public void ReplaceText(string text)
 		{
 			StartPoint.CreateEditPoint().ReplaceText(EndPoint, text,
+                // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
                 (int)( vsEPReplaceTextOptions.vsEPReplaceTextAutoformat | vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines));
 		}
 

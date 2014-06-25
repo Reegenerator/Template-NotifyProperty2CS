@@ -63,8 +63,8 @@ namespace RgenLib.TaggedSegment
 		/// <remarks></remarks>
 		private static string InternalToString(XElement x, SegmentTypes segmentType)
 		{
-			StringWriter writer = new StringWriter();
-			XmlWriter cw = new XmlWriter(writer) {SegmentType = segmentType};
+			var writer = new StringWriter();
+			var cw = new XmlWriter(writer) {SegmentType = segmentType};
 			//Strip Namespace if it's an Xelement
 			x = StripNS(x);
 			//write
@@ -94,7 +94,7 @@ namespace RgenLib.TaggedSegment
 		public static XElement StripNS(XElement root)
 		{
 			var res = new XElement(root);
-			res.ReplaceAttributes(root.Attributes().Where((attr) => (!attr.IsNamespaceDeclaration)));
+			res.ReplaceAttributes(root.Attributes().Where(attr => (!attr.IsNamespaceDeclaration)));
 			return res;
 		}
 

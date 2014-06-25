@@ -1,5 +1,4 @@
 ﻿using System;
-using Kodeo.Reegenerator.Generators;
 
 namespace RgenLib {
     public abstract class TaggedCodeRenderer : CodeRendererEx {

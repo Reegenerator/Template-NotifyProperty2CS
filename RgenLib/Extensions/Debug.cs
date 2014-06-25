@@ -42,7 +42,6 @@ namespace RgenLib.Extensions {
         /// <returns></returns>
         /// <remarks></remarks>
         public static IEnumerable<T> DebugMembers<T>(this IEnumerable list, string memberName) {
-            var sb = new List<T>();
             var res = from object x in list
                       select Versioned.CallByName(x, memberName, CallType.Get);
 
@@ -69,7 +68,6 @@ namespace RgenLib.Extensions {
         /// <returns></returns>
         /// <remarks></remarks>
         public static object DebugMembers(this IEnumerable list, string memberName, string secondMemberName) {
-            var sb = new List<string>();
             var res = from object x in list
                       select new {
                           Member1 = Versioned.CallByName(x, memberName, CallType.Get),

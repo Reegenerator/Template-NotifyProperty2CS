@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using Attributes;
 using EnvDTE;
 using EnvDTE80;
-using Kodeo.Reegenerator;
 using Kodeo.Reegenerator.Generators;
 using RgenLib.Extensions;
 using RgenLib.TaggedSegment;
@@ -25,7 +24,7 @@ namespace Templates {
 
     public partial class NotifyProperty {
 
-        private ManagerType _manager;
+        private readonly ManagerType _manager;
         private static readonly string INotifyPropertyChangedName = typeof(INotifyPropertyChanged).FullName;
         private static readonly Type _optionAttributeType = typeof(NotifyPropertyOptionAttribute);
 
@@ -39,13 +38,13 @@ namespace Templates {
         }
 
         private string INotifierFullName {
-            get { return this.ProjectItem.Project.DefaultNamespace.DotJoin(NotifyPropertyLibrary.INotifierName); }
+            get { return ProjectItem.Project.DefaultNamespace.DotJoin(NotifyPropertyLibrary.INotifierName); }
         }
 
         public NotifyProperty() {
 
             //var tagName = (new NotifyPropertyChanged_GenAttribute()).TagName;
-            _manager = new ManagerType(TagFormat.Json);
+            _manager = new ManagerType(TagFormat.Xml);
         }
         public ManagerType Manager {
             get {
@@ -67,10 +66,10 @@ namespace Templates {
             const string className = NotifyPropertyLibrary.DefaultClassName;
             var classes = prj.GetCodeElements<CodeClass>();
             var classFullname = prj.DefaultNamespace.DotJoin(className);
-            List<CodeClass> matchingClass = null;
+            List<CodeClass> matchingClass;
             classes.TryGetValue(classFullname, out matchingClass);
 
-            ProjectItem classItem = null;
+            ProjectItem classItem;
             if (matchingClass == null) {
                 //Class not found, generate
                 var filePath = Path.Combine(prj.FullPath, className + ".cs");
@@ -97,7 +96,7 @@ namespace Templates {
             }
             var textDoc = classItem.Document.ToTextDocument();
             var writer = new ManagerType.Writer(_manager) {
-                TargetRange = new TaggedRange() { StartPoint = textDoc.StartPoint, EndPoint = textDoc.EndPoint, SegmentType = SegmentTypes.Region },
+                TargetRange = new TaggedRange { StartPoint = textDoc.StartPoint, EndPoint = textDoc.EndPoint, SegmentType = SegmentTypes.Region },
                 InsertStart = textDoc.StartPoint
 
             };
@@ -107,12 +106,12 @@ namespace Templates {
                 var code = new NotifyPropertyLibrary(prj.DefaultNamespace).RenderToString();
                 writer.Content = code;
                 writer.InsertOrReplace(_alwaysInsert);
-                classItem.Save("");
+                classItem.Save();
             }
 
             //restore to previous state. Close if was not open initially
             if (!wasOpen) {
-                classItem.Document.Close(vsSaveChanges.vsSaveChangesPrompt);
+                classItem.Document.Close();
             }
         }
 
@@ -123,7 +122,7 @@ namespace Templates {
         private void RenderWithinTarget() {
 
             var undoCtx = Dte.UndoContext;
-            undoCtx.Open(OptionAttributeType.Name, false);
+            undoCtx.Open(OptionAttributeType.Name);
             try {
                 //render shared library. It has to be created before the interface can be added to the classes. Otherwise EnvDte would throw exception
                 RenderLibrary();
@@ -142,7 +141,7 @@ namespace Templates {
                     GenerateInClass(classWriter);
 
                     //!if also doing derivedClasses
-                    bool applyToSubclasses = classWriter.OptionTag.OptionAttribute.ApplyToDerivedClasses;
+                    var applyToSubclasses = classWriter.OptionTag.OptionAttribute.ApplyToDerivedClasses;
                     if (applyToSubclasses) {
 
                         //!for each subclass
@@ -241,7 +240,7 @@ namespace Templates {
                 GenProperty(output, prop.Name, prop.Type.SafeFullName(), comment, propAttrs, interfaceImpl)
                 );
             var writer = new ManagerType.Writer(parentWriter) {
-                TargetRange = new TaggedRange() { SegmentType = SegmentTypes.Region },
+                TargetRange = new TaggedRange { SegmentType = SegmentTypes.Region },
                 TagNote = string.Format("{0} expanded by", prop.Name),
                 //OptionTag,
                 Content = code
@@ -252,6 +251,7 @@ namespace Templates {
 
 
             //Replace all code starting from comment to endPoint of the property
+            // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
             const int options = (int)(vsEPReplaceTextOptions.vsEPReplaceTextAutoformat |
                                        vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines);
             prop.GetCommentStartPoint()
@@ -279,7 +279,7 @@ namespace Templates {
             }
 
             var extras = GetValidatedExtraNotifications(parentWriter.Clone(optionTag));
-            return string.Format(NotifyChangedFormat, string.Join(",", extras.Select((x) => x.Quote())));
+            return string.Format(NotifyChangedFormat, string.Join(",", extras.Select(x => x.Quote())));
 
 
         }
@@ -292,11 +292,11 @@ namespace Templates {
         /// <remarks></remarks>
         public string[] GetValidatedExtraNotifications(ManagerType.Writer writer) {
 
-            var propNames = new HashSet<string>(writer.Class.GetProperties().Select((x) => x.Name));
+            var propNames = new HashSet<string>(writer.Class.GetProperties().Select(x => x.Name));
             var extraNotifications = writer.OptionTag.OptionAttribute.ExtraNotifications
                                         .Split(new[] { ",", " " }, StringSplitOptions.RemoveEmptyEntries);
 
-            var invalids = extraNotifications.Where((x) => !(propNames.Contains(x))).ToArray();
+            var invalids = extraNotifications.Where(x => !(propNames.Contains(x))).ToArray();
             if (invalids.Any()) {
                 writer.HasError = true;
                 writer.Status.AppendFormat("Properties:{0} to be notified are not found in the class", string.Join(", ", invalids));
@@ -335,7 +335,6 @@ namespace Templates {
                 }
             }
 
-
             //Extra notifications
             var extraNotifyCode = GenInMember_ExtraNotifications(optionTag, parentWriter);
             code = code.Conjoin(Environment.NewLine, extraNotifyCode);
@@ -346,12 +345,12 @@ namespace Templates {
             var memberWriter = new ManagerType.Writer(parentWriter) {
                 TagNote = note,
                 OptionTag = optionTag,
-                TargetRange = new TaggedRange() { StartPoint = codeElement.StartPoint, EndPoint = codeElement.EndPoint, SegmentType = SegmentTypes.Region },
+                TargetRange = new TaggedRange { StartPoint = codeElement.StartPoint, EndPoint = codeElement.EndPoint, SegmentType = SegmentTypes.Region },
                 Content = code,
             };
 
             //Find insertion point
-            EditPoint insertPoint = null;
+            EditPoint insertPoint;
             EditPoint afterClosingBracePoint = null;
            
             var insertTag = ManagerType.GeneratedSegment.FindInsertionPoint(memberWriter.TargetRange);
@@ -367,7 +366,7 @@ namespace Templates {
             else {
                 //!InsertPoint Tag found, insert right after it
                 insertPoint = insertTag.Range.EndPoint.CreateEditPoint();
-                insertPoint.LineDown(1);
+                insertPoint.LineDown();
                 insertPoint.StartOfLine();
             }
 
@@ -395,7 +394,7 @@ namespace Templates {
 
 
             Func<ManagerType.OptionTag, bool> notDpField = x => {
-                bool res = !(dpFields.Any((dp) => dp.Name == x.CodeElement.Name + "Property"));
+                var res = !(dpFields.Any(dp => dp.Name == x.CodeElement.Name + "Property"));
                 return res;
             };
             Func<ManagerType.OptionTag, bool> notIgnored = x => {
@@ -416,7 +415,7 @@ namespace Templates {
         }
 
         private static CodeClass2 GetFirstAncestorImplementing(IEnumerable<CodeClass2> ancestorClasses, string interfaceName) {
-            return ancestorClasses.FirstOrDefault((x) => x.ImplementedInterfaces.OfType<CodeInterface>().Any((i) => i.FullName == interfaceName));
+            return ancestorClasses.FirstOrDefault(x => x.ImplementedInterfaces.OfType<CodeInterface>().Any(i => i.FullName == interfaceName));
 
         }
         private void GenerateNotifyFunctions(ManagerType.Writer tsWriter) {
@@ -432,9 +431,9 @@ namespace Templates {
             //!If INotify is already implemented by base class, do not generate (only generate tag)
             var ancestorClasses = tsWriter.Class.GetAncestorClasses().ToArray();
             var ancestorImplementingINPC = GetFirstAncestorImplementing(ancestorClasses, INotifyPropertyChangedName);
-            string inotifierFullname = string.Format("{0}.{1}", ProjectItem.Project.DefaultNamespace, NotifyPropertyLibrary.INotifierName);
+            var inotifierFullname = string.Format("{0}.{1}", ProjectItem.Project.DefaultNamespace, NotifyPropertyLibrary.INotifierName);
             var ancestorImplementingINotifier = GetFirstAncestorImplementing(ancestorClasses, inotifierFullname);
-            string code = "";
+            string code;
             if (ancestorImplementingINotifier != null) {
                 code = string.Format("'{0} already implemented by {1}", NotifyPropertyLibrary.INotifierName, ancestorImplementingINotifier.FullName);
             }
@@ -442,9 +441,8 @@ namespace Templates {
                 code = string.Format("'{0} already implemented by {1}{2}", ancestorImplementingINPC.FullName, INotifyPropertyChangedName, Environment.NewLine);
             }
             else {
-                code = General.GetTemplateOutput((output) => GenFunctions(output, tsWriter.Class.FullName, true));
+                code = General.GetTemplateOutput(output => GenFunctions(output, tsWriter.Class.FullName, true));
             }
-
             var insertPoint = tsWriter.Class.GetStartPoint(vsCMPart.vsCMPartBody).CreateEditPoint();
             insertPoint.StartOfLine();
             //var body = writer.Class.GetText(vsCMPart.vsCMPartBody);
@@ -454,7 +452,7 @@ namespace Templates {
             //copy info, instead of using the passed parameter, prevent unintentionally using irrelevant property set 
             // by other code
             var newInfo = new ManagerType.Writer(tsWriter) {
-                TargetRange = new TaggedRange() { StartPoint = tsWriter.Class.StartPoint, EndPoint = tsWriter.Class.EndPoint, SegmentType = SegmentTypes.Region },
+                TargetRange = new TaggedRange { StartPoint = tsWriter.Class.StartPoint, EndPoint = tsWriter.Class.EndPoint, SegmentType = SegmentTypes.Region },
                 InsertStart = insertPoint,
                 Content = code,
                 TagNote = "INotifier Functions",
@@ -478,7 +476,7 @@ namespace Templates {
         }
 
         private void AppendWarning(ManagerType.Writer writer) {
-            CodeProperty2[] autoProperties = writer.Class.GetAutoProperties().Where(x => !((new ManagerType.OptionTag(x)).OptionAttribute.IsIgnored)).ToArray();
+            var autoProperties = writer.Class.GetAutoProperties().Where(x => !((new ManagerType.OptionTag(x)).OptionAttribute.IsIgnored)).ToArray();
             //?Warn unprocesssed autoproperties
             if (autoProperties.Any()) {
                 writer.HasError = true;
@@ -494,7 +492,7 @@ namespace Templates {
 
         public override RenderResults Render() {
             Debug.SetTraceListener(OutputPaneTraceListener);
-            this.RenderWithinTarget();
+            RenderWithinTarget();
             return null; // new RenderResults();
             //"'Because of the way custom tool works a file has to be generated. This file can be safely ignored.");
 

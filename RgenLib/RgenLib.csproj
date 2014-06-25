@@ -122,12 +122,10 @@
     <Compile Include="TaggedSegment\CodeClassJsonConverter.cs" />
     <Compile Include="TaggedSegment\GeneratedSegment.cs" />
     <Compile Include="TaggedSegment\Json\NullDefaultEnumConverter.cs" />
-    <Compile Include="TaggedSegment\Json\EnumConverter.cs" />
     <Compile Include="TaggedSegment\Json\OrderedContractResolver.cs" />
     <Compile Include="TaggedSegment\RegenModes.cs" />
     <Compile Include="TaggedSegment\TagFormat.cs" />
     <Compile Include="TaggedSegment\TaggedRange.cs" />
-    <Compile Include="TaggedSegment\TagWrapper.cs" />
     <Compile Include="TaggedSegment\Json\VersionConverter.cs" />
     <Compile Include="TaggedSegment\OptionTag.cs" />
     <Compile Include="TaggedSegment\Constants.cs" />

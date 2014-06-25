@@ -11,11 +11,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Reegenerator", "Reegenerato
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Templates", "Templates\Templates.csproj", "{AD46592A-87B9-4BF2-9F47-B7CD63A01E70}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attributes", "Attributes\Attributes.csproj", "{1CF4996B-DA27-476A-9951-105241589F9C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RgenLib", "RgenLib\RgenLib.csproj", "{FA884BB3-23D7-495C-A246-364FB3B2A478}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +29,6 @@ Global
 		{AD46592A-87B9-4BF2-9F47-B7CD63A01E70}.Reegenerator|Any CPU.ActiveCfg = Release|Any CPU
 		{AD46592A-87B9-4BF2-9F47-B7CD63A01E70}.Reegenerator|Any CPU.Build.0 = Release|Any CPU
 		{AD46592A-87B9-4BF2-9F47-B7CD63A01E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Reegenerator|Any CPU.ActiveCfg = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Reegenerator|Any CPU.Build.0 = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1CF4996B-DA27-476A-9951-105241589F9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1CF4996B-DA27-476A-9951-105241589F9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CF4996B-DA27-476A-9951-105241589F9C}.Reegenerator|Any CPU.ActiveCfg = Release|Any CPU
@@ -47,6 +41,12 @@ Global
 		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Reegenerator|Any CPU.Build.0 = Reegenerator|Any CPU
 		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Reegenerator|Any CPU.ActiveCfg = Release|Any CPU
+		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Reegenerator|Any CPU.Build.0 = Release|Any CPU
+		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

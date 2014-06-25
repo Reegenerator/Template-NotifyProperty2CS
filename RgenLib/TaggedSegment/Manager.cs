@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Attributes;
 using EnvDTE80;
 
 namespace RgenLib.TaggedSegment {
@@ -20,7 +19,6 @@ namespace RgenLib.TaggedSegment {
         public Manager(TagFormat tagFormat)
         {
             _tagFormat = tagFormat;
-            _propertyToXml = XmlAttributeAttribute.GetPropertyToXmlAttributeTranslation(typeof(TOptionAttr));
 
         }
         private readonly TagFormat _tagFormat;
@@ -29,7 +27,6 @@ namespace RgenLib.TaggedSegment {
             get { return _tagFormat; }
         }
 
-        private readonly Dictionary<string, string> _propertyToXml;
 
      
         public Writer CreateWriter() {

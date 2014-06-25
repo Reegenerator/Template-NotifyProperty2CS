@@ -6,11 +6,6 @@
 //-------------------------------------------------------
 namespace Templates
 {
-    using System;
-    using System.Linq;
-    using System.Collections.Generic;
-    
-    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Reegenerator", "2.0.6.0")]
     [Kodeo.Reegenerator.Generators.TemplateDisplayAttribute(DisplayName="NotifyPropertyLibrary", Description="Render library for NotifyPropertyChanged", HideInDialog=true)]
     public partial class NotifyPropertyLibrary : Kodeo.Reegenerator.Generators.CodeRenderer

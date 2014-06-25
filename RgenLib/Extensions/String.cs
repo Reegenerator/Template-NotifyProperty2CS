@@ -1,5 +1,6 @@
 ﻿
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RgenLib.Extensions
 {
@@ -43,6 +44,22 @@ namespace RgenLib.Extensions
 		{
             return DoubleQuote + s + DoubleQuote;
 		}
+
+	    private static Regex _deleteBlanklinesRegex;
+	    private static Regex DeleteBlanklinesRegex
+	    {
+	        get
+	        {
+                _deleteBlanklinesRegex = _deleteBlanklinesRegex ?? new Regex(@"^\s+$[\r\n]*", RegexOptions.Multiline);
+	            return _deleteBlanklinesRegex;
+	        }
+	    }
+
+	    public static string DeleteBlanklines(this string s)
+	    {
+            return DeleteBlanklinesRegex.Replace(s, "");
+	        
+	    }
 	}
 
 }

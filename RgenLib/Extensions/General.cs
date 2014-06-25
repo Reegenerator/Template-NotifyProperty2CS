@@ -13,6 +13,7 @@ using System.Xml;
 using System.Xml.Linq;
 using EnvDTE;
 using EnvDTE80;
+using Constants = RgenLib.TaggedSegment.Constants;
 using ProjectItem = Kodeo.Reegenerator.Wrappers.ProjectItem;
 using Solution = Kodeo.Reegenerator.Wrappers.Solution;
 
@@ -24,7 +25,7 @@ namespace RgenLib.Extensions {
         private const string InterfaceImplementationPattern = @"^.*?\sAs\s.*?(?<impl>Implements\s.*?)$";
 
         private static readonly Type IsEqual_attrType = typeof(Attribute);
-        private static readonly Regex GetInterfaceImplementation_regex = new Regex(InterfaceImplementationPattern, RgenLib.TaggedSegment.Constants.DefaultRegexOption);
+        private static readonly Regex GetInterfaceImplementation_regex = new Regex(InterfaceImplementationPattern, Constants.DefaultRegexOption);
         private static readonly Regex RemoveEmptyLines_regex = new Regex("^\\s+$[\\r\\n]*", RegexOptions.Multiline);
         private static readonly Dictionary<string, Assembly> GetTypeFromProject_cache = new Dictionary<string, Assembly>();
         //private static readonly ConcurrentDictionary<CodeClass, Type> ToPropertyInfo_classCache = new ConcurrentDictionary<CodeClass, Type>();
@@ -142,7 +143,7 @@ namespace RgenLib.Extensions {
             try
             {
                 if (value == null) return GetDefaultValue(propType);
-                object parsed = null;
+                object parsed;
                 if (propType.IsEnum) {
                     parsed = value.StripQualifier();
                 }

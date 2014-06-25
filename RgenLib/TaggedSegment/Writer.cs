@@ -4,11 +4,9 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using System.Xml.Linq;
-using EnvDTE;
 using EnvDTE80;
 using Newtonsoft.Json;
 using RgenLib.Extensions;
-using RgenLib.TaggedSegment.Json;
 using TextPoint = EnvDTE.TextPoint;
 
 namespace RgenLib.TaggedSegment {
@@ -42,7 +40,7 @@ namespace RgenLib.TaggedSegment {
             }
 
             public Writer(Writer sourceWriter) {
-                this.CopyPropertiesFrom(sourceWriter);
+                CopyPropertiesFrom(sourceWriter);
             }
 
             /// <summary>
@@ -61,7 +59,7 @@ namespace RgenLib.TaggedSegment {
             /// source of properties to be copied
             /// <remarks></remarks>
             public Writer Clone() {
-                var newWriter = new Writer(this.Manager);
+                var newWriter = new Writer(Manager);
                 newWriter.CopyPropertiesFrom(this);
                 return newWriter;
             }
@@ -126,7 +124,7 @@ namespace RgenLib.TaggedSegment {
             }
 
             public TextPoint GetContentEndPoint() {
-                EditPoint endP = InsertStart.CreateEditPoint();
+                var endP = InsertStart.CreateEditPoint();
                 endP.CharRightExact(Content.Length);
                 return endP;
             }
@@ -135,8 +133,8 @@ namespace RgenLib.TaggedSegment {
                 return TargetRange.GetText();
             }
 
-            public TextPoint InsertAndFormat(TextPoint formatEndPoint = null) {
-                var text = GenText();
+            public TextPoint Insert_Format_Trim(TextPoint formatEndPoint = null) {
+                var text = GenText().DeleteBlanklines();
                 InsertedEnd = InsertStart.InsertAndFormat(text, formatEndPoint);
                 return InsertedEnd;
             }
@@ -158,23 +156,16 @@ namespace RgenLib.TaggedSegment {
             }
 
             public XElement GenXmlTag() {
-                //set to null if it's default, so it doesn't need to be written in the tag
-                var isTriggeredByBaseClass = TriggeringBaseClass != null && TriggeringBaseClass != Class;
-
-                var triggerType = isTriggeredByBaseClass ? (TriggerTypes?)TriggerTypes.AttributeInBaseClass : null;
-                var triggerInfo = (triggerType == TriggerTypes.AttributeInBaseClass) ? TriggeringBaseClass.Name : null;
-
+            
                 var xml = new XElement(Tag.TagPrototype);
-                if (triggerType != null) {
-                    xml.SetAttributeValue("Trigger", triggerType.ToString());
+                var trigger = OptionTag.Trigger;
+                if (trigger != null) {
+                    xml.SetAttributeValue("Trigger", trigger.Type.ToString());
+                    xml.SetAttributeValue("TriggerInfo", trigger.TriggeringBaseClass);
                 }
-                if (triggerInfo != null) {
-                    xml.SetAttributeValue("TriggerInfo", triggerInfo);
-                }
+            
 
                 xml.SetAttributeValue(Tag.GenerateDatePropertyName, DateTime.Now.ToString(Constants.TagDateFormat, Constants.TagDateCulture));
-
-
 
                 foreach (var keyValuePair in XmlAttributeAttribute.GetXmlProperties(typeof(Tag))) {
 
@@ -277,7 +268,7 @@ namespace RgenLib.TaggedSegment {
                     return false;
                 }
 
-                InsertAndFormat(formatEndPoint);
+                Insert_Format_Trim(formatEndPoint);
                 //!Open file if requested
                 if (OpenFileOnGenerated && Class != null) {
                     if (!Class.ProjectItem.IsOpen) {

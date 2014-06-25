@@ -1,7 +1,6 @@
-﻿using System;
-using Attributes;
+﻿using Attributes;
 
-namespace Test {
+namespace WinformTest {
     //Uncomment the attribute below and save to trigger code generation
     //[NotifyPropertyOption]
     public class Person {
@@ -11,7 +10,7 @@ namespace Test {
         /// Test Comment
         /// </summary>
         [NotifyPropertyOption(ExtraNotifications = "Name")]
-        public String FirstName { get;set; }
+        public System.String FirstName { get;set; }
 
         [NotifyPropertyOption(IsIgnored = true)]
         public string LastName {get;set;}
@@ -37,8 +36,9 @@ namespace Test {
             get { return string.Format("{0} {1}", FirstName, LastName); }
         }
 
-   
-        public String Address {get;set;}
+        private System.String _Address;
+
+        public System.String Address {get;set;}
 
         [NotifyPropertyOption(ExtraNotifications = "LastName")]
         public void ChangeLastName(string s) {

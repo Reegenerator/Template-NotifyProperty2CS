@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EnvDTE;
+﻿using EnvDTE;
 using EnvDTE80;
 using Kodeo.Reegenerator.Generators;
 using RgenLib.Extensions;
@@ -14,10 +9,10 @@ namespace Templates {
     /// </summary>
     [CodeSnippet]
     class NotifyPropertySnippet : NotifyProperty {
-        protected override EnvDTE80.CodeClass2[] GetValidClasses() {
+        protected override CodeClass2[] GetValidClasses() {
             var cls = Dte.GetCodeElementAtCursor(vsCMElement.vsCMElementClass);
             
-            return cls == null ? new CodeClass2[] { } : new CodeClass2[] { (CodeClass2)cls };
+            return cls == null ? new CodeClass2[] { } : new[] { (CodeClass2)cls };
         }
 
         protected override bool _alwaysInsert {

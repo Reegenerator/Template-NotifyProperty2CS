@@ -25,10 +25,10 @@ namespace RgenLib.Extensions {
         }
         public static string GetLineTextAndNeighbor(this EnvDTE.TextPoint point) {
             var start = point.CreateEditPoint();
-            start.LineUp(1);
+            start.LineUp();
             start.StartOfLine();
             var endP = point.CreateEditPoint();
-            endP.LineDown(1);
+            endP.LineDown();
             endP.EndOfLine();
 
             return start.GetText(endP);
@@ -48,10 +48,10 @@ namespace RgenLib.Extensions {
             var start = tp.CreateEditPoint();
            
             var activePoint = tp.CreateEditPoint();
-            //start.DeleteWhitespace(vsWhitespaceOptions.vsWhitespaceOptionsVertical);
+            start.DeleteWhitespace(vsWhitespaceOptions.vsWhitespaceOptionsVertical);
             activePoint.Insert(text);
             var endPoint = formatEndPoint ?? activePoint;
-            //endPoint.CreateEditPoint().DeleteWhitespace(vsWhitespaceOptions.vsWhitespaceOptionsVertical);
+            endPoint.CreateEditPoint().DeleteWhitespace(vsWhitespaceOptions.vsWhitespaceOptionsVertical);
             start.SmartFormat(endPoint);
             return activePoint;
         }
@@ -112,10 +112,10 @@ namespace RgenLib.Extensions {
                     count -= 1;
                 }
                 if (direction < 0) {
-                    point.CharLeft(1);
+                    point.CharLeft();
                 }
                 else {
-                    point.CharRight(1);
+                    point.CharRight();
                 }
                 count -= 1;
             }

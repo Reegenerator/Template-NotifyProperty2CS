@@ -25,13 +25,11 @@ namespace RgenLib.TaggedSegment {
                 }
             }
 
-            public OptionTag(CodeProperty2 codeProperty2)
-                : base() {
+            public OptionTag(CodeProperty2 codeProperty2) {
                 CodeElement = (CodeElement2)codeProperty2;
             }
 
-            public OptionTag(CodeFunction2 codeFunction)
-                : base() {
+            public OptionTag(CodeFunction2 codeFunction) {
                 CodeElement = (CodeElement2)codeFunction;
             }
         }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using RgenLib.Extensions;
 
 namespace RgenLib.TaggedSegment.Json {
 

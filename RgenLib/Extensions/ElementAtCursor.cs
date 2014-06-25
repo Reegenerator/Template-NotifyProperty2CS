@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using EnvDTE;
 using EnvDTE80;
@@ -106,7 +105,7 @@ namespace RgenLib.Extensions {
 
         private static CodeElements GetCodeElementMembers(CodeElement objCodeElement) {
 
-            CodeElements colCodeElements = default(CodeElements);
+            var colCodeElements = default(CodeElements);
 
 
             // ReSharper disable CanBeReplacedWithTryCastAndCheckForNull

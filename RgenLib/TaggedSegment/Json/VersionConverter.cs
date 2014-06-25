@@ -1,6 +1,5 @@
 ﻿using System;
 using Newtonsoft.Json;
-using RgenLib.Extensions;
 
 namespace RgenLib.TaggedSegment.Json {
     class VersionConverter :JsonConverter {

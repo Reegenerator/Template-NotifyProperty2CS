@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Xml.Linq;
-using Attributes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using RgenLib.Extensions;
 using RgenLib.TaggedSegment.Json;
+using VersionConverter = RgenLib.TaggedSegment.Json.VersionConverter;
 
 namespace RgenLib.TaggedSegment {
     public partial class Manager<TRenderer, TOptionAttr>
@@ -48,7 +46,7 @@ namespace RgenLib.TaggedSegment {
                 get {
                     if (_OrderedPropertyResolver == null) {
                         const int defaultRank = 100;
-                        var orderDict = new Dictionary<string, int>()
+                        var orderDict = new Dictionary<string, int>
                         {
                             {TemplateNamePropertyName, 0},
                             {GenerateDatePropertyName, 1000},
@@ -74,8 +72,8 @@ namespace RgenLib.TaggedSegment {
                 get {
                     if (_TagPrototype == null) {
 
-                        _TagPrototype = new XElement(Tag.XmlTagName);
-                        _TagPrototype.Add(new XAttribute(Tag.XmlRendererAttributeName, typeof(TRenderer).Name));
+                        _TagPrototype = new XElement(XmlTagName);
+                        _TagPrototype.Add(new XAttribute(XmlRendererAttributeName, typeof(TRenderer).Name));
                     }
                     return _TagPrototype;
                 }
@@ -84,7 +82,7 @@ namespace RgenLib.TaggedSegment {
             #endregion
 
             [JsonProperty(PropertyName = TriggerPropertyName)]
-            [XmlAttribute(TriggerPropertyName)]
+            [XmlAttribute(TriggerPropertyName, IsFlattened=true)]
             public TriggerInfo Trigger { get; set; }
 
             // ReSharper disable StaticFieldInGenericType
@@ -118,7 +116,7 @@ namespace RgenLib.TaggedSegment {
             [JsonConverter(typeof(StringEnumConverter))]
             public TagTypes TagType { get; set; }
 
-            [JsonConverter(typeof(Json.VersionConverter))]
+            [JsonConverter(typeof(VersionConverter))]
             [JsonProperty(PropertyName = VersionPropertyName)]
             [XmlAttribute(VersionPropertyName)]
             public Version Version { get; set; }
