@@ -42,7 +42,7 @@ namespace Test {
 
         [NotifyPropertyOption(ExtraNotifications = "LastName")]
         public void ChangeLastName(string s) {
-            _LastName = s;
+            //_LastName = s;
         }
 
 

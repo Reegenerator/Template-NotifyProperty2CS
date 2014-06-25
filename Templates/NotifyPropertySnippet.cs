@@ -2,6 +2,7 @@
 using EnvDTE80;
 using Kodeo.Reegenerator.Generators;
 using RgenLib.Extensions;
+using RgenLib.TaggedSegment;
 
 namespace Templates {
     /// <summary>
@@ -15,15 +16,21 @@ namespace Templates {
             return cls == null ? new CodeClass2[] { } : new[] { (CodeClass2)cls };
         }
 
-        protected override bool _alwaysInsert {
+        protected override bool AlwaysInsert {
             get {
                 return true;
             }
         }
 
-        protected override bool _autoPropertyExpansionIsTagged {
+        protected override bool AutoPropertyExpansionIsTagged {
             get {
                 return false;
+            }
+        }
+
+        protected override RgenLib.TaggedSegment.TriggerTypes TriggerType {
+            get {
+                return TriggerTypes.CodeSnippet;
             }
         }
     }

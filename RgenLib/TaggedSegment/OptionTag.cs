@@ -12,7 +12,7 @@ namespace RgenLib.TaggedSegment {
 
 
             public OptionTag() {
-                //do nothing
+               //do nothing
             }
             public CodeElement2 CodeElement {
                 get { return _codeElement; }

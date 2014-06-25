@@ -31,8 +31,9 @@ namespace Templates {
         /// <summary>
         /// To be overriden by Snippet
         /// </summary>
-        protected virtual bool _alwaysInsert { get { return false; } }
-        protected virtual bool _autoPropertyExpansionIsTagged { get { return true; } }
+        protected virtual bool AlwaysInsert { get { return false; } }
+        protected virtual bool AutoPropertyExpansionIsTagged { get { return true; } }
+        protected virtual TriggerTypes TriggerType { get { return TriggerTypes.Attribute; } }
         public override Type OptionAttributeType {
             get { return _optionAttributeType; }
         }
@@ -105,7 +106,7 @@ namespace Templates {
                 //generate text if outdated
                 var code = new NotifyPropertyLibrary(prj.DefaultNamespace).RenderToString();
                 writer.Content = code;
-                writer.InsertOrReplace(_alwaysInsert);
+                writer.InsertOrReplace(AlwaysInsert);
                 classItem.Save();
             }
 
@@ -246,7 +247,7 @@ namespace Templates {
                 Content = code
             };
 
-            var text = _autoPropertyExpansionIsTagged ? writer.GenText() : code;
+            var text = AutoPropertyExpansionIsTagged ? writer.GenText() : code;
             //only do this once, since once it is expanded it will no longer be detected as auto property
 
 
@@ -342,9 +343,12 @@ namespace Templates {
             //Code Element, could be property setter or a method
             var prop = (optionTag.CodeElement as CodeProperty2);
             var codeElement = (CodeFunction2)((prop != null) ? prop.Setter : (CodeFunction2)optionTag.CodeElement);
+            var tag = optionTag.MemberwiseClone();
+            tag.Trigger.Type = TriggerType;
+
             var memberWriter = new ManagerType.Writer(parentWriter) {
                 TagNote = note,
-                OptionTag = optionTag,
+                OptionTag =(ManagerType.OptionTag) tag,
                 TargetRange = new TaggedRange { StartPoint = codeElement.StartPoint, EndPoint = codeElement.EndPoint, SegmentType = SegmentTypes.Region },
                 Content = code,
             };
@@ -352,7 +356,7 @@ namespace Templates {
             //Find insertion point
             EditPoint insertPoint;
             EditPoint afterClosingBracePoint = null;
-           
+
             var insertTag = ManagerType.GeneratedSegment.FindInsertionPoint(memberWriter.TargetRange);
             if (insertTag == null) {
                 //!No insertion point tag specified, by default insert as last line of setter
@@ -371,7 +375,7 @@ namespace Templates {
             }
 
             memberWriter.InsertStart = insertPoint;
-            memberWriter.InsertOrReplace(_alwaysInsert, afterClosingBracePoint);
+            memberWriter.InsertOrReplace(AlwaysInsert, afterClosingBracePoint);
 
         }
         private void GenInMembers(ManagerType.Writer tsWriter) {
@@ -456,7 +460,7 @@ namespace Templates {
                 InsertStart = insertPoint,
                 Content = code,
                 TagNote = "INotifier Functions",
-                OptionTag = new ManagerType.OptionTag { Category = "INotifierFunctions" }
+                OptionTag = { Category = "INotifierFunctions", Trigger = { Type = TriggerType } }
             };
 
             var isUpdated = newInfo.InsertOrReplace();

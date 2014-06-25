@@ -4,6 +4,7 @@
     /// </summary>
     /// <remarks></remarks>
     public enum TriggerTypes {
+
         /// <summary>
         /// Code generation is triggered because the class is marked with a GeneratorAttribute 
         /// </summary>

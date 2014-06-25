@@ -1,8 +1,8 @@
 ﻿//Formerly VB project-level imports:
-using System;
-using Test;
 
-namespace WinformTest
+using System;
+
+namespace Test
 {
 	public partial class MainForm
 	{

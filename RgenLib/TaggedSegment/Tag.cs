@@ -24,6 +24,7 @@ namespace RgenLib.TaggedSegment {
             protected Tag() {
                 RegenMode = RegenModes.Default;
                 OptionAttribute = new TOptionAttr();
+                Trigger = new TriggerInfo();
             }
             #region TagGeneration
             public const string XmlTagName = "Gen";

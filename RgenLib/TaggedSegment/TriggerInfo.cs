@@ -17,9 +17,11 @@ namespace RgenLib.TaggedSegment {
             Type = type;
         }
         [JsonConverter(typeof(StringEnumConverter))]
+        [XmlAttribute("Type")]
         public TriggerTypes Type { get; set; }
 
         [JsonConverter(typeof(CodeClassJsonConverter))]
+        [XmlAttribute("Base")]
         public CodeClass2 TriggeringBaseClass {get;set;}
 
     }

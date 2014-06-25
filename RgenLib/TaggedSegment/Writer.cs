@@ -27,6 +27,7 @@ namespace RgenLib.TaggedSegment {
             public Writer(Manager<TRenderer, TOptionAttr> manager) {
                 _manager = manager;
                 OptionTag = new OptionTag();
+
             }
             public Writer(Manager<TRenderer, TOptionAttr> manager, CodeClass2 cc)
                 : this(manager) {
@@ -166,15 +167,23 @@ namespace RgenLib.TaggedSegment {
             
 
                 xml.SetAttributeValue(Tag.GenerateDatePropertyName, DateTime.Now.ToString(Constants.TagDateFormat, Constants.TagDateCulture));
+                object debugKey;
+                try
+                {
+                    foreach (var keyValuePair in XmlAttributeAttribute.GetXmlProperties(typeof(Tag)))
+                    {
+                        debugKey = keyValuePair;
+                        var propValue = keyValuePair.Value.GetValue(OptionTag);
+                        //only write the xml attribute if it has a value, to keep the tag concise
+                        if (propValue != null) {
+                            xml.Add(new XAttribute(keyValuePair.Key, propValue));
+                        }
 
-                foreach (var keyValuePair in XmlAttributeAttribute.GetXmlProperties(typeof(Tag))) {
-
-                    var propValue = keyValuePair.Value.GetValue(OptionTag);
-                    //only write the xml attribute if it has a value, to keep the tag concise
-                    if (propValue != null) {
-                        xml.Add(new XAttribute(keyValuePair.Key, propValue));
                     }
-
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
                 }
                 return xml;
             }
