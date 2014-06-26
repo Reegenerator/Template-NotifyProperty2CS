@@ -27,7 +27,7 @@ namespace Test {
                 if (value > 0)
                 {
                     //sample custom insert point
-                    //Reegenerator{Template:"NotifyProperty" Type="InsertPoint"}
+                    //Reegenerator:{Template:"NotifyProperty", Type:"InsertPoint"}
                     //Some other code here
                 }
             }

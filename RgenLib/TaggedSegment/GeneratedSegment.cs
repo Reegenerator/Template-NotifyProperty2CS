@@ -111,7 +111,7 @@ namespace RgenLib.TaggedSegment {
                     //(?<textinfo>[^\r\n]*?)
                     {0}\s*?:\s*?(?<json>\{{\s*?{1}\s*?:\s*?""{2}""[^\r\n]*\}})
                     ";
-                var rendererAttr = TagPrototype.Attribute(XmlRendererAttributeName);
+                var rendererAttr = TagPrototype.Attribute(TemplateNamePropertyName);
                 var tagName = TagPrototype.Name.LocalName;
 
                 var templateName = typeof(TRenderer).Name;
@@ -195,24 +195,20 @@ namespace RgenLib.TaggedSegment {
 
 
             private static void PopulateSegmentWithXml(GeneratedSegment tag, XElement xTag) {
-                string debugName;
-                object debugProps;
-                object debugValue;
+         
                 try {
                     var xmlProps = XmlAttributeAttribute.GetXmlProperties(typeof(GeneratedSegment));
-                    debugProps = xmlProps;
                     foreach (var attr in xTag.Attributes()) {
-                        var name = debugName = attr.Name.LocalName;
+                        var name  = attr.Name.LocalName;
 
 
                         //skip renderer name
-                        if (name == XmlRendererAttributeName) {
+                        if (name == TemplateNamePropertyName) {
                             continue;
                         }
 
                         var prop = xmlProps[name];
                         var value = XmlAttributeAttribute.ParsePropertyValue(prop, attr.Value);
-                        debugValue = value;
                         prop.SetValue(tag, value);
 
                     }

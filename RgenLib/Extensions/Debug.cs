@@ -139,24 +139,24 @@ namespace RgenLib.Extensions {
                    _traceListener.WriteLine(ex.ToString());
                 }
             }
-            if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) {
-                //don't break or launch if shift is held down
-                return;
-            }
-            if (Debugger.IsAttached) {
-                Debugger.Break();
-            }
-            else {
-                //If debug is cancelled once, stop trying to launch
-                if (DebugSkipped) {
-                    return;
-                }
-                var launched = Debugger.Launch();
-                if (!launched) {
-                    DebugSkipped = true;
-                }
+            //if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift)) {
+            //    //don't break or launch if shift is held down
+            //    return;
+            //}
+            //if (Debugger.IsAttached) {
+            //    Debugger.Break();
+            //}
+            //else {
+            //    //If debug is cancelled once, stop trying to launch
+            //    if (DebugSkipped) {
+            //        return;
+            //    }
+            //    var launched = Debugger.Launch();
+            //    if (!launched) {
+            //        DebugSkipped = true;
+            //    }
 
-            }
+            //}
 
         }
         #endregion

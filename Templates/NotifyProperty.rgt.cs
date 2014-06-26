@@ -11,7 +11,6 @@ using Kodeo.Reegenerator.Generators;
 using RgenLib.Extensions;
 using RgenLib.TaggedSegment;
 using System.IO;
-using Constants = EnvDTE.Constants;
 using Debug = RgenLib.Extensions.Debug;
 using ManagerType = RgenLib.TaggedSegment.Manager<Templates.NotifyProperty, Attributes.NotifyPropertyOptionAttribute>;
 
@@ -22,8 +21,10 @@ namespace Templates {
     /// </summary>
     /// <remarks></remarks>
 
-    public partial class NotifyProperty {
+    public partial class NotifyProperty
+    {
 
+        private const string CodeCommentPrefix = "//";
         private readonly ManagerType _manager;
         private static readonly string INotifyPropertyChangedName = typeof(INotifyPropertyChanged).FullName;
         private static readonly Type _optionAttributeType = typeof(NotifyPropertyOptionAttribute);
@@ -45,7 +46,7 @@ namespace Templates {
         public NotifyProperty() {
 
             //var tagName = (new NotifyPropertyChanged_GenAttribute()).TagName;
-            _manager = new ManagerType(TagFormat.Xml);
+            _manager = new ManagerType(TagFormat.Json);
         }
         public ManagerType Manager {
             get {
@@ -439,10 +440,10 @@ namespace Templates {
             var ancestorImplementingINotifier = GetFirstAncestorImplementing(ancestorClasses, inotifierFullname);
             string code;
             if (ancestorImplementingINotifier != null) {
-                code = string.Format("'{0} already implemented by {1}", NotifyPropertyLibrary.INotifierName, ancestorImplementingINotifier.FullName);
+                code = string.Format("{2}{0} already implemented by {1}", NotifyPropertyLibrary.INotifierName, ancestorImplementingINotifier.FullName, CodeCommentPrefix);
             }
             else if (ancestorImplementingINPC != null) {
-                code = string.Format("'{0} already implemented by {1}{2}", ancestorImplementingINPC.FullName, INotifyPropertyChangedName, Environment.NewLine);
+                code = string.Format("{3}{0} already implemented by {1}{2}", ancestorImplementingINPC.FullName, INotifyPropertyChangedName, Environment.NewLine, CodeCommentPrefix);
             }
             else {
                 code = General.GetTemplateOutput(output => GenFunctions(output, tsWriter.Class.FullName, true));

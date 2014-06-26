@@ -27,8 +27,6 @@ namespace RgenLib.TaggedSegment {
                 Trigger = new TriggerInfo();
             }
             #region TagGeneration
-            public const string XmlTagName = "Gen";
-            public const string XmlRendererAttributeName = "Renderer";
 
             #region TagAlternateNames
             private const string RegenModePropertyName = "Regen";
@@ -73,8 +71,8 @@ namespace RgenLib.TaggedSegment {
                 get {
                     if (_TagPrototype == null) {
 
-                        _TagPrototype = new XElement(XmlTagName);
-                        _TagPrototype.Add(new XAttribute(XmlRendererAttributeName, typeof(TRenderer).Name));
+                        _TagPrototype = new XElement(Constants.XmlTag);
+                        _TagPrototype.Add(new XAttribute(TemplateNamePropertyName, typeof(TRenderer).Name));
                     }
                     return _TagPrototype;
                 }

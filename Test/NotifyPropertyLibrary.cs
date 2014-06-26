@@ -1,4 +1,4 @@
-#region <Gen Renderer='NotifyProperty' Date='2014-06-25T14:08' Regen='Never' />
+#region  Reegenerator:{Template:"NotifyProperty",Trig:{},Date:"2014-06-26T13:26:56.9472224+08:00"}
 using System;
 using System.Collections.Generic;
 using System.Linq;

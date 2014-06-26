@@ -8,5 +8,6 @@ namespace RgenLib.TaggedSegment {
         public const string CodeCommentPrefix = "//";
         public const RegexOptions DefaultRegexOption = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace | RegexOptions.Singleline;
         public const string JsonTagPrefix="Reegenerator";
+        public const string XmlTag = JsonTagPrefix;
     }
 }
