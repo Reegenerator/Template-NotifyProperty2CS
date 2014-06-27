@@ -1,35 +1,28 @@
-﻿//Formerly VB project-level imports:
+﻿namespace Test {
+    partial class PersonForm {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
 
-namespace Test
-{
-	public partial class MainForm : System.Windows.Forms.Form
-	{
-		//Form overrides dispose to clean up the component list.
-		[System.Diagnostics.DebuggerNonUserCode()]
-		protected override void Dispose(bool disposing)
-		{
-			try
-			{
-				if (disposing && components != null)
-				{
-					components.Dispose();
-				}
-			}
-			finally
-			{
-				base.Dispose(disposing);
-			}
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing) {
+            if (disposing && (components != null)) {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
-		//Required by the Windows Form Designer
-		private System.ComponentModel.IContainer components;
+        #region Windows Form Designer generated code
 
-		//NOTE: The following procedure is required by the Windows Form Designer
-		//It can be modified using the Windows Form Designer.  
-		//Do not modify it using the code editor.
-		[System.Diagnostics.DebuggerStepThrough()]
-		private void InitializeComponent()
-		{
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
             this.TextBox1 = new System.Windows.Forms.TextBox();
             this.TextBox2 = new System.Windows.Forms.TextBox();
@@ -43,6 +36,7 @@ namespace Test
             this.Label5 = new System.Windows.Forms.Label();
             this.TextBox6 = new System.Windows.Forms.TextBox();
             this.Label6 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.PersonBindingSource = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.PersonBindingSource)).BeginInit();
             this.SuspendLayout();
@@ -55,6 +49,7 @@ namespace Test
             this.TextBox1.ReadOnly = true;
             this.TextBox1.Size = new System.Drawing.Size(214, 20);
             this.TextBox1.TabIndex = 0;
+            this.TextBox1.TextChanged += new System.EventHandler(this.TextBox1_TextChanged);
             // 
             // TextBox2
             // 
@@ -74,7 +69,6 @@ namespace Test
             // 
             // TextBox4
             // 
-            this.TextBox4.DataBindings.Add(new System.Windows.Forms.Binding("Text", this.PersonBindingSource, "AgeString", true));
             this.TextBox4.Location = new System.Drawing.Point(176, 186);
             this.TextBox4.Name = "TextBox4";
             this.TextBox4.Size = new System.Drawing.Size(214, 20);
@@ -150,15 +144,26 @@ namespace Test
             this.Label6.TabIndex = 1;
             this.Label6.Text = "First Name";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(406, 39);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 2;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // PersonBindingSource
             // 
-            this.PersonBindingSource.DataSource = typeof(Person);
+            this.PersonBindingSource.DataSource = typeof(Test.Person);
             // 
-            // MainForm
+            // PersonForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(577, 339);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.Label4);
             this.Controls.Add(this.Label3);
             this.Controls.Add(this.Label2);
@@ -171,28 +176,29 @@ namespace Test
             this.Controls.Add(this.TextBox6);
             this.Controls.Add(this.TextBox5);
             this.Controls.Add(this.TextBox1);
-            this.Name = "MainForm";
+            this.Name = "PersonForm";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.PersonBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		internal System.Windows.Forms.TextBox TextBox1;
-		internal System.Windows.Forms.BindingSource PersonBindingSource;
-		internal System.Windows.Forms.TextBox TextBox2;
-		internal System.Windows.Forms.TextBox TextBox3;
-		internal System.Windows.Forms.TextBox TextBox4;
-		internal System.Windows.Forms.Label Label1;
-		internal System.Windows.Forms.Label Label2;
-		internal System.Windows.Forms.Label Label3;
+        }
+        internal System.Windows.Forms.TextBox TextBox1;
+        internal System.Windows.Forms.BindingSource PersonBindingSource;
+        internal System.Windows.Forms.TextBox TextBox2;
+        internal System.Windows.Forms.TextBox TextBox3;
+        internal System.Windows.Forms.TextBox TextBox4;
+        internal System.Windows.Forms.Label Label1;
+        internal System.Windows.Forms.Label Label2;
+        internal System.Windows.Forms.Label Label3;
         internal System.Windows.Forms.Label Label4;
-		internal System.Windows.Forms.TextBox TextBox5;
-		internal System.Windows.Forms.Label Label5;
-		internal System.Windows.Forms.TextBox TextBox6;
-		internal System.Windows.Forms.Label Label6;
+        internal System.Windows.Forms.TextBox TextBox5;
+        internal System.Windows.Forms.Label Label5;
+        internal System.Windows.Forms.TextBox TextBox6;
+        internal System.Windows.Forms.Label Label6;
 
-	}
+        #endregion
+        private System.Windows.Forms.Button button1;
 
+    }
 }

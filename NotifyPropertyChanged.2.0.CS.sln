@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Attributes", "Attributes\At
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RgenLib", "RgenLib\RgenLib.csproj", "{FA884BB3-23D7-495C-A246-364FB3B2A478}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfTest", "WpfTest\WpfTest.csproj", "{4D83F620-EF63-4E06-A3C6-A8C0AE48796B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,12 +41,12 @@ Global
 		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Reegenerator|Any CPU.Build.0 = Reegenerator|Any CPU
 		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA884BB3-23D7-495C-A246-364FB3B2A478}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Reegenerator|Any CPU.ActiveCfg = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Reegenerator|Any CPU.Build.0 = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BCA02FB5-F99E-4193-A0E0-80F1D3FAD3E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D83F620-EF63-4E06-A3C6-A8C0AE48796B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D83F620-EF63-4E06-A3C6-A8C0AE48796B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D83F620-EF63-4E06-A3C6-A8C0AE48796B}.Reegenerator|Any CPU.ActiveCfg = Release|Any CPU
+		{4D83F620-EF63-4E06-A3C6-A8C0AE48796B}.Reegenerator|Any CPU.Build.0 = Release|Any CPU
+		{4D83F620-EF63-4E06-A3C6-A8C0AE48796B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D83F620-EF63-4E06-A3C6-A8C0AE48796B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

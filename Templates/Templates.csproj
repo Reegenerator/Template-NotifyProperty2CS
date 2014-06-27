@@ -55,13 +55,17 @@
     <Reference Include="Kodeo.Reegenerator, Version=2.0.6.0, Culture=neutral, PublicKeyToken=07b809f3a6579266, processorArchitecture=MSIL">
       <Private>False</Private>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Data" />
     <Reference Include="EnvDTE" />
     <Reference Include="EnvDTE80" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NotifyProperty.Designer.cs">
@@ -70,6 +74,9 @@
     </Compile>
     <Compile Include="NotifyProperty.rgt.cs">
       <DependentUpon>NotifyProperty.rgt</DependentUpon>
+    </Compile>
+    <Compile Include="NotifyPropertyDialog.xaml.cs">
+      <DependentUpon>NotifyPropertyDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="NotifyPropertyLibrary.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -126,6 +133,12 @@
       <Project>{fa884bb3-23d7-495c-a246-364fb3b2a478}</Project>
       <Name>RgenLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="NotifyPropertyDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
