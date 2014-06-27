@@ -19,7 +19,11 @@
 
         <Label Grid.Row="0"  >First</Label>
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}"  />
-        <Label Grid.Row="1" Grid.Column="0">Last</Label>
+        <DockPanel Grid.Row="1" Grid.Column="0">
+            <Label DockPanel.Dock="Left" >Last</Label>
+            <Button Click="Button_Click">Call ChangeLastName()</Button>
+
+        </DockPanel>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}"  />
         <Label Grid.Row="2" Grid.Column="0">Name</Label>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Name,Mode=OneWay}"  />

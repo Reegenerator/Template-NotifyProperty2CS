@@ -5,6 +5,7 @@ namespace Attributes {
     /// <summary>
     /// Classes marked with this attribute will have it's NotifyPropertyChanged code generated automatically
     /// </summary>
+    [AttributeUsage(AttributeTargets.All, AllowMultiple=true)]
     public class NotifyPropertyOptionAttribute : GeneratorOptionAttribute {
         public NotifyPropertyOptionAttribute() {
             //To regenerate all OnVersionChanged generated code, increment the version number

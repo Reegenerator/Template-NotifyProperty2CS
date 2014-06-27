@@ -134,7 +134,8 @@ namespace RgenLib.TaggedSegment {
                 return TargetRange.GetText();
             }
 
-            public TextPoint Insert_Format_Trim(TextPoint formatEndPoint = null) {
+            public TextPoint Insert_Format_Trim(TextPoint formatEndPoint = null)
+            {
                 var text = GenText().DeleteBlanklines();
                 InsertedEnd = InsertStart.InsertAndFormat(text, formatEndPoint);
                 return InsertedEnd;
@@ -142,9 +143,7 @@ namespace RgenLib.TaggedSegment {
 
             #region Tag Generation
 
-            public string GenTag() {
-                return Manager.TagFormat == TagFormat.Json ? GenJsonTag() : GenXmlTag().ToString();
-            }
+  
             public string GenJsonTag() {
 
                 var serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, ContractResolver = Tag.OrderedPropertyResolver };
@@ -197,7 +196,7 @@ namespace RgenLib.TaggedSegment {
             }
 
             private string GenTaggedRegionText(string regionName) {
-
+                //add newline before #region to make sure it's on a separate line
                 var res = string.Format("#region {0}{1}{2}{1}{3}{1}", regionName, Environment.NewLine, Content, "#endregion");
                 return res;
             }

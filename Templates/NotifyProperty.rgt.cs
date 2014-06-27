@@ -351,6 +351,7 @@ namespace Templates {
                 TagNote = note,
                 OptionTag =(ManagerType.OptionTag) tag,
                 TargetRange = new TaggedRange { StartPoint = codeElement.StartPoint, EndPoint = codeElement.EndPoint, SegmentType = SegmentTypes.Region },
+                
                 Content = code,
             };
 
@@ -365,7 +366,8 @@ namespace Templates {
                 insertPoint = codeElement.GetClosingBracePosition();
                 afterClosingBracePoint = insertPoint.CreateEditPoint();
                 afterClosingBracePoint.CharRight();
-                //always insert new line in case the everything in one line
+                //makes sure region is on new line
+                insertPoint.Insert(Environment.NewLine);
 
             }
             else {
@@ -374,7 +376,7 @@ namespace Templates {
                 insertPoint.LineDown();
                 insertPoint.StartOfLine();
             }
-
+        
             memberWriter.InsertStart = insertPoint;
             memberWriter.InsertOrReplace(AlwaysInsert, afterClosingBracePoint);
 
